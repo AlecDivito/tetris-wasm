@@ -10,3 +10,4 @@ pub mod point;
 pub mod game;
 pub mod config;
 mod scoring;
+pub mod locks;

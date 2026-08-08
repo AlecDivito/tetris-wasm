@@ -15,6 +15,36 @@ pub enum Action {
     Nothing = 255,
 }
 
+impl Action {
+    pub fn is_rotation(&self) -> bool {
+        self.is_rotate_clock_wise() || self.is_rotate_counter_clock_wise()
+    }
+
+    pub fn is_move(&self) -> bool {
+        self.is_move_left() || self.is_move_right()
+    }
+
+    pub fn is_move_or_rotation(&self) -> bool {
+        self.is_move() || self.is_rotation()
+    }
+
+    pub fn is_rotate_clock_wise(&self) -> bool {
+        matches!(self, Self::RotateClockWise)
+    }
+
+    pub fn is_rotate_counter_clock_wise(&self) -> bool {
+        matches!(self, Self::RotateCounterClockWise)
+    }
+
+    pub fn is_move_right(&self) -> bool {
+        matches!(self, Self::MoveRight)
+    }
+
+    pub fn is_move_left(&self) -> bool {
+        matches!(self, Self::MoveLeft)
+    }
+}
+
 impl std::convert::From<u8> for Action {
     fn from(byte: u8) -> Self {
         match byte {

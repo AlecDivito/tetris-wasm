@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::tetris::config::Config;
+use crate::tetris::locks::LockDelay;
 use crate::tetris::scoring::{ScoreB2BType, TSpin};
 
 use super::action::Action;
@@ -45,6 +46,7 @@ pub struct Game {
     config: Config,
     actions: Vec<Action>,
     score_b2b_type: ScoreB2BType,
+    lock_delay: LockDelay,
 }
 
 /// try to remove the first element of the array
@@ -86,6 +88,7 @@ impl Game {
         let hold_piece = Cell::EMPTY;
         let can_swap_piece = true;
         let can_hard_drop = true;
+        let lock_delay = config.get_lock_delay();
 
         Game {
             game,
@@ -107,6 +110,7 @@ impl Game {
             config,
             actions: vec![],
             score_b2b_type: ScoreB2BType::None,
+            lock_delay,
         }
     }
 
@@ -137,29 +141,38 @@ impl Game {
 
         self.game.update(elapsed_time);
         self.piece.update(elapsed_time);
+        if !self.can_piece_advance() {
+            self.lock_delay.update(elapsed_time);
+        }
+
         let mut result = false;
         if self.game.can_update_game(self.update_speed()) {
             self.game.reset();
-            if self.can_piece_advance() {
-                self.piece.advance();
+            if self.advance_if_possible() {
+                self.lock_delay.handle_advance();
                 if self.soft_drop {
                     self.score += 1;
                 }
                 result = false;
             } else {
-                self.merge_piece_into_board();
-                self.can_swap_piece = true;
-                if self.is_topped_out() {
-                    self.game_over = true;
+                // Handle lock delays
+                if !self.lock_delay.is_locked() {
+                    result = false
                 } else {
-                    self.update_board();
-                    self.get_next_piece();
-                    self.piece.advance();
-                    if self.soft_drop {
-                        self.score += 1
+                    self.merge_piece_into_board();
+                    self.can_swap_piece = true;
+                    if self.is_topped_out() {
+                        self.game_over = true;
+                    } else {
+                        self.update_board();
+                        self.get_next_piece();
+                        self.piece.advance();
+                        if self.soft_drop {
+                            self.score += 1
+                        }
                     }
+                    result = true;
                 }
-                result = true;
             }
             self.soft_drop = false;
         }
@@ -301,11 +314,21 @@ impl Game {
         }
     }
 
+    fn advance_if_possible(&mut self) -> bool {
+        if self.can_piece_advance() {
+            self.piece.advance();
+            true
+        } else {
+            false
+        }
+    }
+
     /// Check if piece can advance on the board
     ///
     /// make sure that all blocks under a cell is empty,
     /// otherwise return false to stop advancement
     fn can_piece_advance(&self) -> bool {
+        let mut can_piece_still_advance = vec![];
         // 1. find the lowest point on the shape
         for row in 0..self.piece.get_bounding_box_size() {
             for col in 0..self.piece.get_bounding_box_size() {
@@ -319,20 +342,23 @@ impl Game {
 
                     // 3. check if piece will pass the border if it goes down 1 more
                     if world_coord.y + 1 >= self.height {
-                        return false;
+                        can_piece_still_advance.push(false);
+                        break;
                     }
 
                     // 4. now that the row is in world coordinates, check if there is a piece
                     //    under this one in the game cells
                     let world_index = self.get_index(world_coord.y + 1, world_coord.x);
                     if self.cells[world_index] != Cell::EMPTY {
-                        return false;
+                        can_piece_still_advance.push(false);
+                        break;
                     }
+                    can_piece_still_advance.push(true)
                 }
             }
         }
 
-        return true;
+        return can_piece_still_advance.iter().any(|f| *f == false);
     }
 
     /// Check if a piece can move right
@@ -489,11 +515,15 @@ impl Game {
 
             _ => 0,
         };
-        let multiplier = if self.score_b2b_type != ScoreB2BType::None { 1.5 } else { 1.0 };
+        let multiplier = if self.score_b2b_type != ScoreB2BType::None {
+            1.5
+        } else {
+            1.0
+        };
         self.score += ((base_score as f64 * multiplier) as u32 + self.combo_count) * self.level;
         self.score_b2b_type = b2b_score_type;
 
-        self.combo_count += self.config.combo_increment;
+        self.combo_count += 50;
 
         // update level if rows_completed passed a threshold
         self.rows_completed = self.rows_completed + (removable_rows.len() as u32);
@@ -627,14 +657,6 @@ impl Game {
                     }
 
                     let world_col = self.piece.get_position().y + local_row + (-1 * y);
-                    println!(
-                        "({:?}) {} {} {} {}",
-                        self.piece.get_position(),
-                        world_col,
-                        world_row,
-                        local_col,
-                        local_row,
-                    );
                     if world_col >= self.height || world_col < 0 {
                         passes.push(false);
                         continue;
@@ -648,7 +670,6 @@ impl Game {
                     }
                 }
             }
-            log!("{:?}", passes);
             if passes.iter().all(|v| *v == true) {
                 origin_move = Some((x, y));
                 break;
@@ -656,10 +677,9 @@ impl Game {
         }
 
         if let Some((x, y)) = origin_move {
-            println!("{:?}", self.piece.get_position_ref());
+            self.lock_delay.handle_move();
             self.piece.get_position_ref().x += -1 * x;
             self.piece.get_position_ref().y += -1 * y;
-            println!("{:?}", self.piece.get_position_ref());
         } else {
             self.piece.set_timer(timer);
             match direction {
@@ -677,6 +697,7 @@ impl Game {
             Direction::Right => self.can_piece_go_right(),
         };
         if can_move {
+            self.lock_delay.handle_move();
             self.piece.move_piece(direction);
         }
         false
