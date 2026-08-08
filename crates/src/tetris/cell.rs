@@ -68,8 +68,24 @@ impl Debug for Cell {
 
 impl Cell {
     /// pick a random cell
+    #[cfg(target_arch = "wasm32")]
     pub fn random() -> Cell {
         let piece = (js_sys::Math::random() * 6.0).round() as i32;
+        match piece {
+            0 => Cell::I,
+            1 => Cell::O,
+            2 => Cell::T,
+            3 => Cell::S,
+            4 => Cell::Z,
+            5 => Cell::J,
+            6 => Cell::L,
+            _ => Cell::EMPTY,
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn random() -> Cell {
+        let piece = (rand::random_range(0.0..6.0) as f64).round() as i32;
         match piece {
             0 => Cell::I,
             1 => Cell::O,
@@ -236,13 +252,13 @@ impl PieceQueue {
 
     #[cfg(not(target_arch = "wasm32"))]
     fn shuffle<T>(mut array: Vec<T>) -> Vec<T> {
-        // for i in (0..array.len()).rev() {
-        //     let mut j = (rand::random_range(0.0..1.0) as f64 * ((i as f64) + 1.0)).round() as usize;
-        //     if j >= array.len() {
-        //         j = array.len() - 1;
-        //     }
-        //     array.swap(i, j);
-        // }
+        for i in (0..array.len()).rev() {
+            let mut j = (rand::random_range(0.0..1.0) as f64 * ((i as f64) + 1.0)).round() as usize;
+            if j >= array.len() {
+                j = array.len() - 1;
+            }
+            array.swap(i, j);
+        }
         array
     }
 }
