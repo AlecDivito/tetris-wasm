@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::tetris::{action::Action, config::Config};
+use crate::tetris::{config::Config, game_timer::Timer};
 
 /*
 Lock Delay Types
@@ -42,7 +42,9 @@ pub enum LockDelayType {
 
 const MAX_TIME_REDUCTION: f64 = 200.0;
 
+#[derive(Debug)]
 pub struct LockDelay {
+    timer: Timer,
     reset_type: LockDelayType,
     max_allowed_ground_time: f64, // in milliseconds
     max_allowed_timer_resets: u32,
@@ -51,6 +53,11 @@ pub struct LockDelay {
 }
 
 impl LockDelay {
+    pub fn force_lock(&mut self) {
+        self.accumulated_lock_time = self.max_allowed_ground_time;
+        self.reset_count = self.max_allowed_timer_resets;
+    }
+
     pub fn reset(&mut self) {
         self.accumulated_lock_time = 0.0;
         self.reset_count = 0;
@@ -58,15 +65,13 @@ impl LockDelay {
 
     pub fn handle_move(&mut self) {
         match self.reset_type {
-            LockDelayType::MoveReset  => {
+            LockDelayType::MoveReset => {
                 self.accumulated_lock_time = 0.0;
                 self.reset_count = 0;
             }
-            LockDelayType::CappedReset  => {
-                if self.reset_count < self.max_allowed_timer_resets {
-                    self.accumulated_lock_time = 0.0;
-                    self.reset_count += 1 as u32;
-                }
+            LockDelayType::CappedReset => {
+                self.accumulated_lock_time = 0.0;
+                self.reset_count += 1 as u32;
             }
             _ => {}
         }
@@ -87,23 +92,32 @@ impl LockDelay {
             LockDelayType::MoveReset | LockDelayType::StepReset => {
                 return self.accumulated_lock_time >= self.max_allowed_ground_time
             }
-            LockDelayType::CappedReset => todo!(),
+            LockDelayType::CappedReset => {
+                return self.accumulated_lock_time >= self.max_allowed_ground_time
+                    || self.reset_count > self.max_allowed_timer_resets
+            }
             _ => true,
         }
     }
 
-    pub fn update(&mut self, elapsed_time: f64) {
+    pub fn update(&mut self, current_time: f64) {
+        let elapsed_time = self.timer.get_elapsed_time(current_time);
         self.accumulated_lock_time += if elapsed_time > MAX_TIME_REDUCTION {
             MAX_TIME_REDUCTION
         } else {
             elapsed_time
         };
     }
+
+    pub fn set_time(&mut self, current_time: f64) {
+        self.timer.get_elapsed_time(current_time);
+    }
 }
 
 impl From<&Config> for LockDelay {
     fn from(value: &Config) -> Self {
         Self {
+            timer: Timer::new(),
             max_allowed_ground_time: value.lock_delay_timer,
             reset_type: value.lock_delay_type,
             max_allowed_timer_resets: value.lock_delay_max_resets,

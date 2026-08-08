@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Timer {
     last_time: f64,
 }

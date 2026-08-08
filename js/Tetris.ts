@@ -202,7 +202,7 @@ class Tetris {
         if (touchControls) {
             this.tetrisGame.touch_event_handler(touchControls.x, touchControls.y);
         }
-        this.tetrisGame.event_handler(this.inputController.getEventQueue());
+        this.tetrisGame.byte_event_handler(this.inputController.getEventQueue());
         const boardMerged = this.tetrisGame.update(performance.now());
         this.drawGrid();
         this.drawCells();

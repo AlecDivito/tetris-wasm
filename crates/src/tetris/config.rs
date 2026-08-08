@@ -14,7 +14,6 @@ pub struct Config {
     pub soft_drop_speed_multiplier: f64,
     pub speed_multiplier: f64,
     pub max_piece_queue_size: usize,
-    pub piece_rotation_wait_time: f64,
 
     pub lock_delay_type: LockDelayType,
     pub lock_delay_timer: f64,
@@ -42,8 +41,7 @@ impl Default for Config {
             soft_drop_speed_multiplier: 0.05,
             speed_multiplier: 0.0007,
             max_piece_queue_size: 7,
-            piece_rotation_wait_time: 250.0,
-            lock_delay_type: LockDelayType::StepReset,
+            lock_delay_type: LockDelayType::CappedReset,
             lock_delay_timer: 500.0,
             lock_delay_max_resets: 15,
             entry_delay: 0.0,

@@ -134,15 +134,17 @@ impl Game {
     }
 
     /// Update the tetris board
-    pub fn update(&mut self, elapsed_time: f64) -> bool {
+    pub fn update(&mut self, total_time: f64) -> bool {
         if self.game.is_paused() || self.game_over {
             return false;
         }
 
-        self.game.update(elapsed_time);
-        self.piece.update(elapsed_time);
+        self.game.update(total_time);
+        self.piece.update(total_time);
         if !self.can_piece_advance() {
-            self.lock_delay.update(elapsed_time);
+            self.lock_delay.update(total_time);
+        } else {
+            self.lock_delay.set_time(total_time);
         }
 
         let mut result = false;
@@ -159,6 +161,7 @@ impl Game {
                 if !self.lock_delay.is_locked() {
                     result = false
                 } else {
+                    self.lock_delay.reset();
                     self.merge_piece_into_board();
                     self.can_swap_piece = true;
                     if self.is_topped_out() {
@@ -358,7 +361,7 @@ impl Game {
             }
         }
 
-        return can_piece_still_advance.iter().any(|f| *f == false);
+        return can_piece_still_advance.iter().all(|f| *f == true);
     }
 
     /// Check if a piece can move right
@@ -377,6 +380,10 @@ impl Game {
                     // 3. now that the row is in world coordinates, check if there is a piece
                     //    to the right of the game cell
                     let world_index = self.get_index(world_coord.y, world_coord.x + 1);
+                    if world_index as i32 >= self.height * self.width {
+                        return false;
+                    }
+
                     if self.cells[world_index] != Cell::EMPTY {
                         return false;
                     }
@@ -623,11 +630,6 @@ impl Game {
     }
 
     fn rotate(&mut self, direction: Direction) -> bool {
-        if self.piece.get_record_timer() > self.config.piece_rotation_wait_time {
-            self.piece.reset_timer();
-        } else {
-            return false;
-        }
         if self.piece.get_type() == Cell::O {
             return false;
         }
@@ -663,6 +665,11 @@ impl Game {
                     }
 
                     let world_index = self.get_index(world_col, world_row);
+                    if world_index as i32 >= self.width * self.height {
+                        passes.push(false);
+                        continue;
+                    }
+
                     if self.cells[world_index] == Cell::EMPTY {
                         passes.push(true);
                     } else {
@@ -677,9 +684,12 @@ impl Game {
         }
 
         if let Some((x, y)) = origin_move {
-            self.lock_delay.handle_move();
             self.piece.get_position_ref().x += -1 * x;
             self.piece.get_position_ref().y += -1 * y;
+            if !self.can_piece_advance() {
+                log!("Reset timer {:?}", self.lock_delay);
+                self.lock_delay.handle_move();
+            }
         } else {
             self.piece.set_timer(timer);
             match direction {
@@ -697,7 +707,10 @@ impl Game {
             Direction::Right => self.can_piece_go_right(),
         };
         if can_move {
-            self.lock_delay.handle_move();
+            if !self.can_piece_advance() {
+                log!("Reset timer {:?}", self.lock_delay);
+                self.lock_delay.handle_move();
+            }
             self.piece.move_piece(direction);
         }
         false
@@ -709,6 +722,7 @@ impl Game {
             self.score += ((self.height - self.piece.get_position().y) * 2) as u32;
             self.piece.set_position(self.shadow_piece_position);
             self.game.update_asap();
+            self.lock_delay.force_lock();
             return true;
         } else {
             return false;
@@ -1143,5 +1157,39 @@ mod test {
         assert_eq!(cells[game.get_index(5, 5)], Cell::J);
         assert_eq!(cells[game.get_index(6, 5)], Cell::J);
         assert_eq!(cells[game.get_index(6, 4)], Cell::J);
+    }
+
+    #[test]
+    pub fn test_bottom_right_shenanigans() {
+        let mut game = Game::new();
+        game.set_piece(new_piece(
+            Cell::I,
+            game.width - 4,
+            game.height - 2,
+            Rotation::NORTH,
+        ));
+        action(&mut game, Action::MoveRight);
+        render_board(&mut game);
+        game.print();
+
+        let cells = game.get_cell_vec();
+        assert_eq!(
+            cells[game.get_index(game.height - 1, game.width - 4)],
+            Cell::I
+        );
+        assert_eq!(
+            cells[game.get_index(game.height - 1, game.width - 3)],
+            Cell::I
+        );
+        assert_eq!(
+            cells[game.get_index(game.height - 1, game.width - 2)],
+            Cell::I
+        );
+        assert_eq!(
+            cells[game.get_index(game.height - 1, game.width - 1)],
+            Cell::I
+        );
+        action(&mut game, Action::HardDrop);
+        game.update(16.667);
     }
 }
