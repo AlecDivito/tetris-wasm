@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::tetris::{cell::RandomizerType, locks::{LockDelay, LockDelayType}};
+use crate::tetris::{cell::RandomizerType, locks::{LockDelay, LockDelayType}, top_out::TopOutType};
 
 #[wasm_bindgen]
 pub struct Config {
@@ -22,6 +22,8 @@ pub struct Config {
     pub entry_delay: f64,
 
     pub randomizer: RandomizerType,
+
+    pub top_out: TopOutType,
 }
 
 impl Config {
@@ -48,6 +50,7 @@ impl Default for Config {
             lock_delay_max_resets: 15,
             entry_delay: 0.0,
             randomizer: RandomizerType::BagOf7,
+            top_out: TopOutType::BlockOut,
         }
     }
 }

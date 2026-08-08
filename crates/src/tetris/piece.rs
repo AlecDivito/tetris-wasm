@@ -45,9 +45,9 @@ impl Piece {
         let cells = cell.get_cells();
         let rotation = Rotation::NORTH;
         let position = match cell {
-            Cell::O => Point { x: 4, y: 3 },
-            Cell::I => Point { x: 3, y: 3 },
-            _ => Point { x: 3, y: 3 },
+            Cell::O => Point { x: 4, y: 2 },
+            Cell::I => Point { x: 3, y: 2 },
+            _ => Point { x: 3, y: 2 },
         };
 
         Piece {

@@ -11,6 +11,7 @@ use super::game_timer::GameTimer;
 use super::piece::Piece;
 use super::point::Point;
 use super::rotation::Direction;
+use super::top_out::TopOutType;
 
 #[cfg(target_arch = "wasm32")]
 macro_rules! log {
@@ -160,11 +161,18 @@ impl Game {
                     self.lock_delay.reset();
                     self.merge_piece_into_board();
                     self.can_swap_piece = true;
-                    if self.is_topped_out() {
+                    self.update_board();
+                    let is_topped_out = if matches!(self.config.top_out, TopOutType::LockOut) {
+                        let is_topped_out = self.is_topped_out();
+                        self.get_next_piece();
+                        is_topped_out
+                    } else {
+                        self.get_next_piece();
+                        self.is_topped_out()
+                    };
+                    if is_topped_out {
                         self.game_over = true;
                     } else {
-                        self.update_board();
-                        self.get_next_piece();
                         self.piece.advance();
                         if self.soft_drop {
                             self.score += 1
@@ -745,13 +753,54 @@ impl Game {
     }
 
     fn is_topped_out(&self) -> bool {
+        match self.config.top_out {
+            TopOutType::LockOut => self.is_piece_invisible(),
+            TopOutType::TopOut => self.is_any_piece_on_board_hidden(),
+            // Defaults to BlockOut
+            _ => self.is_piece_in_non_empty_board(),
+        }
+    }
+
+    fn is_any_piece_on_board_hidden(&self) -> bool {
         for col in 0..self.width {
-            let index = self.get_index(4, col);
-            if self.cells[index] != Cell::EMPTY {
-                return true;
+            let world_index = self.get_index(self.get_offset_height() - 1, col);
+            if self.cells[world_index] != Cell::EMPTY {
+                return true
             }
         }
-        false
+        return false
+    }
+
+    fn is_piece_invisible(&self) -> bool {
+        for row in 0..self.piece.get_bounding_box_size() {
+            for col in 0..self.piece.get_bounding_box_size() {
+                if self.piece.get_cell(row, col) == Cell::EMPTY {
+                    continue;
+                }
+                if self.piece.get_position().y + row >= self.get_offset_height() {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    fn is_piece_in_non_empty_board(&self) -> bool {
+        for row in 0..self.piece.get_bounding_box_size() {
+            for col in 0..self.piece.get_bounding_box_size() {
+                if self.piece.get_cell(row, col) == Cell::EMPTY {
+                    continue;
+                }
+                let world_index = self.get_index(
+                    self.piece.get_position().y + row,
+                    self.piece.get_position().x + col,
+                );
+                if self.cells[world_index] != Cell::EMPTY {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     fn update_speed(&self) -> f64 {
@@ -1179,5 +1228,21 @@ mod test {
         );
         action(&mut game, Action::HardDrop);
         game.update(16.667);
+    }
+
+    #[test]
+    pub fn test_is_piece_invisible() {
+        let mut game = Game::new();
+        game.set_piece(new_piece(Cell::O, game.width - 4, 3, Rotation::NORTH));
+        assert_eq!(game.is_piece_invisible(), true);
+    }
+
+        #[test]
+    pub fn test_is_piece_visible() {
+        let mut game = Game::new();
+        game.set_piece(new_piece(Cell::O, game.width - 4, 4, Rotation::NORTH));
+        render_board(&mut game);
+        game.print();
+        assert_eq!(game.is_piece_invisible(), false);
     }
 }
