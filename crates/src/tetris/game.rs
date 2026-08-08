@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
+use crate::tetris::cell::PieceQueue;
 use crate::tetris::config::Config;
 use crate::tetris::locks::LockDelay;
 use crate::tetris::scoring::{ScoreB2BType, TSpin};
@@ -36,7 +37,6 @@ pub struct Game {
     width: i32,
     height: i32,
     cells: Vec<Cell>,
-    piece_queue: Vec<Cell>,
     piece: Piece,
     shadow_piece_position: Point,
     can_swap_piece: bool,
@@ -47,6 +47,7 @@ pub struct Game {
     actions: Vec<Action>,
     score_b2b_type: ScoreB2BType,
     lock_delay: LockDelay,
+    piece_queue: PieceQueue,
 }
 
 /// try to remove the first element of the array
@@ -76,13 +77,8 @@ impl Game {
 
         let cells = (0..width * height).map(|_i| Cell::EMPTY).collect();
 
-        let mut piece_queue = Cell::random_piece_queue();
-        piece_queue.append(&mut Cell::random_piece_queue());
-
-        let mut piece = match shift(&mut piece_queue) {
-            Some(x) => Piece::new(x),
-            None => Piece::random(),
-        };
+        let mut piece_queue = PieceQueue::new(config.randomizer);
+        let mut piece = Piece::new(piece_queue.shift());
         piece.advance();
         let shadow_piece_position = Point::new(0, 0);
         let hold_piece = Cell::EMPTY;
@@ -223,7 +219,7 @@ impl Game {
     }
 
     /// Get the cells that are in queue to go next
-    pub fn get_queued_pieces(&self) -> *const Cell {
+    pub fn get_queued_pieces(&mut self) -> *const Cell {
         self.piece_queue.as_ptr()
     }
 
@@ -687,7 +683,6 @@ impl Game {
             self.piece.get_position_ref().x += -1 * x;
             self.piece.get_position_ref().y += -1 * y;
             if !self.can_piece_advance() {
-                log!("Reset timer {:?}", self.lock_delay);
                 self.lock_delay.handle_move();
             }
         } else {
@@ -708,7 +703,6 @@ impl Game {
         };
         if can_move {
             if !self.can_piece_advance() {
-                log!("Reset timer {:?}", self.lock_delay);
                 self.lock_delay.handle_move();
             }
             self.piece.move_piece(direction);
@@ -747,13 +741,7 @@ impl Game {
     }
 
     fn get_next_piece(&mut self) {
-        self.piece = match shift(&mut self.piece_queue) {
-            Some(x) => Piece::new(x),
-            None => Piece::random(),
-        };
-        if self.piece_queue.len() <= self.config.max_piece_queue_size {
-            self.piece_queue.append(&mut Cell::random_piece_queue());
-        }
+        self.piece = Piece::new(self.piece_queue.shift());
     }
 
     fn is_topped_out(&self) -> bool {

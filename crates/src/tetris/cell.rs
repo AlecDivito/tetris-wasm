@@ -1,4 +1,7 @@
-use std::fmt::{Debug, Display};
+use std::{
+    collections::VecDeque,
+    fmt::{Debug, Display},
+};
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -75,14 +78,12 @@ impl Cell {
             4 => Cell::Z,
             5 => Cell::J,
             6 => Cell::L,
-            7 => Cell::EMPTY,
             _ => Cell::EMPTY,
         }
     }
 
-    /// Get a random queue of next pieces to pick to start falling
-    pub fn random_piece_queue() -> Vec<Cell> {
-        let mut cell_array = vec![
+    pub fn bag_of_cells() -> Vec<Cell> {
+        vec![
             Cell::I,
             Cell::O,
             Cell::T,
@@ -90,9 +91,7 @@ impl Cell {
             Cell::Z,
             Cell::J,
             Cell::L,
-        ];
-        Cell::shuffle(&mut cell_array);
-        cell_array
+        ]
     }
 
     /// Get the cell represented in a 4x4 grid in a 1D array
@@ -123,11 +122,108 @@ impl Cell {
             _ => vec![Cell::EMPTY]
         }
     }
+}
+
+#[wasm_bindgen]
+#[derive(Debug, Copy, Clone)]
+pub enum RandomizerType {
+    /// Shuffles all 7 unique pieces like a deck of cards.
+    /// Hands them out and then shuffles a new batch.
+    BagOf7 = "BAG_OF_7",
+    /// Roll out a random piece, check against memory history
+    /// of last pieces dealt. re-rolls if it finds a match.
+    /// Last 4 pieces can't be duplicated unless finding a
+    /// pieces fails 4 times.
+    HistoryBased = "HISTORY_BASED",
+    /// Every time a piece spawns, game selects an index from
+    /// 0 to 6 with zero regard for what came before
+    Memoryless = "MEMORYLESS",
+    /// Massive pool containing 5 copied of each of the 7 pieces
+    PoolShuffling = "POOL_SHUFFLING",
+}
+
+pub struct PieceQueue {
+    ty: RandomizerType,
+    history: Vec<Cell>,
+    queue: VecDeque<Cell>,
+}
+
+impl PieceQueue {
+    pub fn new(ty: RandomizerType) -> Self {
+        let mut this = Self {
+            ty,
+            history: Vec::new(),
+            queue: VecDeque::new(),
+        };
+        this.requeue();
+        this
+    }
+
+    pub fn shift(&mut self) -> Cell {
+        let cell = self.queue.pop_front().unwrap();
+        self.history.push(cell);
+        if self.queue.len() < 7 {
+            self.requeue()
+        }
+        cell
+    }
+
+    fn requeue(&mut self) {
+        match self.ty {
+            RandomizerType::BagOf7 => self.queue.extend(Self::shuffle(Cell::bag_of_cells())),
+            RandomizerType::HistoryBased => {
+                if self.history.len() < 7 {
+                    self.queue.extend(Self::shuffle(Cell::bag_of_cells()));
+                } else {
+                    let mut selected_piece = None;
+                    let last_pieces = &self.history[self.history.len() - 5..self.history.len() - 1];
+                    for _ in 0..4 {
+                        let cell = Cell::random();
+                        if !last_pieces.contains(&cell) {
+                            selected_piece = Some(cell);
+                            break;
+                        }
+                    }
+                    if let Some(selected) = selected_piece {
+                        self.queue.push_back(selected);
+                    } else {
+                        self.queue.push_back(Cell::random());
+                    }
+                }
+            }
+            RandomizerType::PoolShuffling => self
+                .queue
+                .extend(Self::shuffle(Cell::bag_of_cells().repeat(5))),
+            _ => {
+                for _ in 0..7 {
+                    self.queue.push_back(Cell::random())
+                }
+            }
+        }
+        if matches!(
+            self.ty,
+            RandomizerType::BagOf7 | RandomizerType::HistoryBased | RandomizerType::PoolShuffling
+        ) {
+            if self.history.len() == 0 {
+                for _ in 0..7 {
+                    let front = self.queue.front().unwrap();
+                    if [Cell::S, Cell::Z, Cell::O].contains(front) {
+                        let first_cell = self.queue.pop_front().unwrap();
+                        self.queue.push_back(first_cell);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn as_ptr(&mut self) -> *const Cell {
+        self.queue.make_contiguous().as_ptr()
+    }
 
     /// Random generator for next piece position
     /// Read More: https://tetris.fandom.com/wiki/Random_Generator
     #[cfg(target_arch = "wasm32")]
-    fn shuffle<T>(array: &mut Vec<T>) {
+    fn shuffle<T>(mut array: Vec<T>) -> Vec<T> {
         for i in (0..array.len()).rev() {
             let mut j = (js_sys::Math::random() * ((i as f64) + 1.0)).round() as usize;
             if j >= array.len() {
@@ -135,10 +231,11 @@ impl Cell {
             }
             array.swap(i, j);
         }
+        array
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    fn shuffle<T>(array: &mut Vec<T>) {
+    fn shuffle<T>(mut array: Vec<T>) -> Vec<T> {
         // for i in (0..array.len()).rev() {
         //     let mut j = (rand::random_range(0.0..1.0) as f64 * ((i as f64) + 1.0)).round() as usize;
         //     if j >= array.len() {
@@ -146,5 +243,6 @@ impl Cell {
         //     }
         //     array.swap(i, j);
         // }
+        array
     }
 }
