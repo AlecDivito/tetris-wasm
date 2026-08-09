@@ -4,6 +4,8 @@ import PauseModal from "./pages/PauseModal";
 import GameOverModal from "./pages/GameOverModal";
 import Tetris from "./Tetris";
 import { Game } from "../crates/pkg/rusty_web_tetris";
+import CustomGamePage from "./pages/CustomGamePage";
+import HowToPlayModal from "./pages/HowToPlayModal";
 
 /**
  * Website StateManager
@@ -17,6 +19,8 @@ export default class StateManager {
     private gamePage: GamePage;
     private pauseModal: PauseModal;
     private gameOverModal: GameOverModal;
+    private customGamePage: CustomGamePage;
+    private howToPlayModal: HowToPlayModal;
     private game?: Tetris;
 
     private constructor() {
@@ -25,6 +29,8 @@ export default class StateManager {
         this.gamePage = new GamePage();
         this.pauseModal = new PauseModal();
         this.gameOverModal = new GameOverModal();
+        this.customGamePage = new CustomGamePage();
+        this.howToPlayModal = new HowToPlayModal();
         this.game = undefined;
     }
     
@@ -36,11 +42,12 @@ export default class StateManager {
     }
 
     GoToMainMenu() {
-        console.log('going to main')
         this.mainMenu.show();
         this.gamePage.hide();
         this.pauseModal.hide();
         this.gameOverModal.hide();
+        this.customGamePage.hide();
+        this.howToPlayModal.hide();
         /**
          * Make the game null
          */
@@ -64,6 +71,21 @@ export default class StateManager {
         this.GoToGame();
         this.game = new Tetris(Game.new(), this.gamePage.CalculateTetrisConfig());
         this.game.startTetris();
+    }
+
+    GoToCustomGame() {
+        this.mainMenu.hide();
+        this.customGamePage.show();
+        this.pauseModal.hide();
+        this.gameOverModal.hide();
+    }
+
+    PushToHowToPlayModal() {
+        this.howToPlayModal.show();
+    }
+
+    PopHowToPlayModal() {
+        this.howToPlayModal.hide();
     }
 
     GoToGameAndResumeGame() {

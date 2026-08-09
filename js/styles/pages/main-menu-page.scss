@@ -4,7 +4,48 @@
 
 .main-menu {
 
+    &__subtitle {
+        text-align: center;
+        font-size: 1em;
+        font-weight: 500;
+        color: $color-text-muted;
+        letter-spacing: 4px;
+
+    }
+
     &__title {
         text-align: center;
+
+        &__letter {
+            font-weight: bold;
+            color: $color-accent;
+            text-transform: uppercase;
+            font-size: 2em;
+            letter-spacing: 3px;
+
+            &.t1 {
+                color: $color-piece-j;
+            }
+            &.t2 {
+                color: $color-piece-t;
+            }
+            &.e {
+                color: $color-piece-o;
+            }
+            &.r {
+                color: $color-piece-l;
+            }
+            &.i {
+                color: $color-piece-i;
+            }
+            &.s {
+                color: $color-piece-s;
+            }
+
+        }
+    }
+
+    .hero {
+        margin-bottom: 4rem;
     }
 }

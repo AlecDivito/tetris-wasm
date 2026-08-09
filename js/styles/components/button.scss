@@ -3,6 +3,9 @@ button {
     cursor: pointer;
     border: none;
     outline: none;
+    font-family: $font;
+    font-weight: bold;
+    font-size: 1em;
 
     top: $button-position-top-normal;
     background: $button-background-color;

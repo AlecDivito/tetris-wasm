@@ -1,14 +1,19 @@
 .card {
     padding: $card-padding;
-    background-color: $card-background-color;
+    background-color: $color-surface;
     border-radius: $card-border-radius;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 
     &__title {
-        margin: $card-title-margin;
-        text-align: center;
+        color: $color-text-muted;
+        margin: 0;
     }
 
     &__content {
-        margin: $card-content-margin;
+        canvas {
+            background-color: $color-surface;
+        }
     }
 }

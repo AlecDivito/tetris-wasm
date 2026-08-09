@@ -338,7 +338,7 @@ class Tetris {
         let maxY = this.config.previewCellSize * 4;
 
         // draw in background
-        context.fillStyle = '#000000';
+        context.fillStyle = '#1e2130';
         context.fillRect(0, 0, maxX, maxY * cells.length);
 
         cells.forEach(cell => {
@@ -359,7 +359,7 @@ class Tetris {
                     if (pieces[i] !== Cell.EMPTY) {
                         context.fillStyle = this.getColor(cell);
                     } else {
-                        context.fillStyle = '#000000';
+                        context.fillStyle = '#1e2130';
                     }
                     context.fillRect(
                         minX + (col * (this.config.previewCellSize + 1) + 1),
@@ -383,7 +383,7 @@ class Tetris {
         const context = holdCanvas.getContext('2d')!;
         // draw in background
         context.beginPath();
-        context.fillStyle = '#000000';
+        context.fillStyle = '#1e2130'; // TODO: CSS variables
         context.fillRect(0, 0, 150, 150);
 
         let boundingBox = 3;
@@ -403,7 +403,7 @@ class Tetris {
                 if (pieces[i] !== Cell.EMPTY) {
                     context.fillStyle = this.getColor(holdCell);
                 } else {
-                    context.fillStyle = '#000000';
+                    context.fillStyle = '#1e2130';
                 }
                 context.fillRect(
                     col * (this.config.previewCellSize + 1) + 1,
@@ -447,7 +447,7 @@ class Tetris {
     private getColor(cell: Cell): string {
         switch (cell) {
             case Cell.EMPTY:
-                return '#000'; // black
+                return '#1e2130'; // black
             case Cell.I:
                 return '#00FFFF'; // cyan
             case Cell.O:
@@ -463,7 +463,7 @@ class Tetris {
             case Cell.L:
                 return '#FFA500'; // Orange
             default:
-                return '#FFFFFF'; // white
+                return '#1e2130'; // white
         }
     }
 }

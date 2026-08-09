@@ -34,12 +34,12 @@ export default class GamePage extends Page {
         let padding = 8 * 4;
         let width = document.documentElement.clientWidth - padding;
         
-        let mainWidth = .70 * width;
+        let mainWidth = .465 * width;
         let sideWidth = .15 * width;
 
-        this.rightContentBar.style.width = `${sideWidth}px`;
-        this.leftContentBar.style.width = `${sideWidth}px`;
-        this.mainContentBar.style.width = `${mainWidth}px`;
+        // this.rightContentBar.style.width = `${sideWidth}px`;
+        // this.leftContentBar.style.width = `${sideWidth}px`;
+        // this.mainContentBar.style.width = `${mainWidth}px`;
     }
 
     pauseGame = () => {
@@ -60,7 +60,7 @@ export default class GamePage extends Page {
         }
 
         return {
-            gridColor: "#FFF",
+            gridColor: "#1e2130",
             cellSize,
             previewCellSize
         };
