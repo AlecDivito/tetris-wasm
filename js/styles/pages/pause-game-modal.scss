@@ -3,10 +3,21 @@
 }
 
 .pause {
+    width: 300px;
+    padding: 1.5rem;
+    gap: 1.5rem;
+
+    > .card__title {
+        color: $color-text;
+        padding: 1rem 0;
+    }
 
     &__list {
         display: flex;
         flex-direction: column;
+        padding: 0px 2rem;
+        width: 100%;
+        box-sizing: border-box;
 
         > button {
             margin-bottom: $pause-list-margin-bottom;

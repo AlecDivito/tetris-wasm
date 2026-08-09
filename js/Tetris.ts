@@ -27,14 +27,14 @@ export interface TetrisConfig {
 
 // TODO: when starting game or resuming a game, trigger a count down timer from 3
 
- // TODO: Game must have this notice when the game starts (XXXX is the year the game was created)
- // Game © 1985~XXXX Game Holding.
- // Game logos, Game theme song and Tetriminos are trademarks of Game Holding.
- // The Game trade dress is owned by Game Holding.
- // Licensed to The Game Company.
- // Game Game Design by Alexey Pajitnov.
- // Game Logo Design by Roger Dean.
- // All Rights Reserved.
+// TODO: Game must have this notice when the game starts (XXXX is the year the game was created)
+// Game © 1985~XXXX Game Holding.
+// Game logos, Game theme song and Tetriminos are trademarks of Game Holding.
+// The Game trade dress is owned by Game Holding.
+// Licensed to The Game Company.
+// Game Game Design by Alexey Pajitnov.
+// Game Logo Design by Roger Dean.
+// All Rights Reserved.
 
 /**
  * Tetris is a small layer that surrounds our tetris game logic in web assembly.
@@ -232,7 +232,7 @@ class Tetris {
      */
     private drawGrid() {
         this.ctx.beginPath();
-        this.ctx.strokeStyle = this.config.gridColor;
+        this.ctx.strokeStyle = '#000'// this.config.gridColor;
 
         // Vertical lines
         for (let i = 0; i <= this.width; i++) {
@@ -266,9 +266,9 @@ class Tetris {
             for (let col = 0; col < this.width; col++) {
                 const index = this.getIndex(row, col);
                 if (cells[index] === Cell.EMPTY && row < this.totalHeight - this.boardHeight) {
-                    this.ctx.fillStyle = '#132456';
+                    this.ctx.fillStyle = '#000';
                 } else {
-                    this.ctx.fillStyle = this.getColor(cells[index]);
+                    this.ctx.fillStyle = this.getColor(cells[index], '#000');
                 }
 
                 this.drawCell(row, col);
@@ -285,7 +285,7 @@ class Tetris {
                         `${this.getIndex(row, col)}`,
                         col * (this.config.cellSize + 1) + 1,
                         (row - this.offsetHeight) * (this.config.cellSize + 1) +
-                            this.config.cellSize,
+                        this.config.cellSize,
                     );
                 }
             }
@@ -444,10 +444,10 @@ class Tetris {
      * Given the type of cell that needs coloring, return a hex color
      * @param cell type of cell
      */
-    private getColor(cell: Cell): string {
+    private getColor(cell: Cell, emptyOverride?: string): string {
         switch (cell) {
             case Cell.EMPTY:
-                return '#1e2130'; // black
+                return emptyOverride ?? '#1e2130'; // black
             case Cell.I:
                 return '#00FFFF'; // cyan
             case Cell.O:
@@ -463,7 +463,7 @@ class Tetris {
             case Cell.L:
                 return '#FFA500'; // Orange
             default:
-                return '#1e2130'; // white
+                return emptyOverride ?? '#1e2130'; // white
         }
     }
 }
@@ -476,32 +476,32 @@ function getCells(cell: Cell) {
     switch (cell) {
         case Cell.O:
             return [Cell.O, Cell.O,
-                    Cell.O, Cell.O];
+            Cell.O, Cell.O];
         case Cell.I:
             return [Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY,
-                    Cell.I,     Cell.I,     Cell.I,     Cell.I,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.I, Cell.I, Cell.I, Cell.I,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.T:
             return [Cell.EMPTY, Cell.T, Cell.EMPTY,
-                    Cell.T, Cell.T, Cell.T,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.T, Cell.T, Cell.T,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.S:
             return [Cell.EMPTY, Cell.S, Cell.S,
-                    Cell.S, Cell.S, Cell.EMPTY,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.S, Cell.S, Cell.EMPTY,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.Z:
             return [Cell.Z, Cell.Z, Cell.EMPTY,
-                    Cell.EMPTY, Cell.Z, Cell.Z,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.EMPTY, Cell.Z, Cell.Z,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.J:
             return [Cell.EMPTY, Cell.EMPTY, Cell.J,
-                    Cell.J, Cell.J, Cell.J,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.J, Cell.J, Cell.J,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.L:
             return [Cell.L, Cell.EMPTY, Cell.EMPTY,
-                    Cell.L, Cell.L, Cell.L,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.L, Cell.L, Cell.L,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         default:
             return [Cell.EMPTY];
     }

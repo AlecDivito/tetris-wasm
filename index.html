@@ -123,13 +123,17 @@
       Examples:
         https://www.pinterest.co.uk/pin/838443655599579811/
     -->
-        <div id="pause-game-modal" class="modal card pause">
-            <h1 class="card__title">Pause Game</h1>
-            <div class="card__content pause__list">
-                <button id="pause-game-resume">Resume</button>
-                <button id="pause-game-restart">Restart</button>
-                <button id="pause-game-control">How to play</button>
-                <button id="pause-game-exit">Exit Game</button>
+        <div id="pause-game-modal" class="modal">
+            <div class="modal__content flex center middle">
+                <div class="card pause flex center middle">
+                    <h1 class="card__title">Paused</h1>
+                    <div class="card__content pause__list">
+                        <button id="pause-game-resume">Resume</button>
+                        <button id="pause-game-restart">Restart</button>
+                        <button id="pause-game-control">How to play</button>
+                        <button id="pause-game-exit" class="inverted">Exit Game</button>
+                    </div>
+                </div>
             </div>
         </div>
 
