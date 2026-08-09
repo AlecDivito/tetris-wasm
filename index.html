@@ -7,59 +7,254 @@
         <title>Tetris With Wasm</title>
     </head>
     <body>
-        <!-- Main Menu page
-      Ability to access:
-        - (required) Play Game Page (use defaults)
-        - (optional) Select Game Mode Page
-        - (optional) Controls Page 
-        - (optional) Stats? idk
-    -->
-        <div id="main-menu-page" class="main-menu">
-            <div class="hero">
-                <h2 class="main-menu__subtitle">STACK, CLEAR, REPEAT</h2>
-                <h1 class="main-menu__title">
-                    <span class="main-menu__title__letter t1">T</span>
-                    <span class="main-menu__title__letter e">e</span>
-                    <span class="main-menu__title__letter t2">t</span>
-                    <span class="main-menu__title__letter r">r</span>
-                    <span class="main-menu__title__letter i">i</span>
-                    <span class="main-menu__title__letter s">s</span>
-                </h1>
-            </div>
-            <div class="flex column gap-4">
-                <button id="main-menu-play">Play</button>
-                <button id="main-menu-custom-game">Custom Game</button>
-                <button id="main-menu-how-to-play">How to Play</button>
+        <div id="main-menu-page" class="modal">
+            <div class="modal__content flex center middle">
+                <div class="main-menu">
+                    <div class="hero">
+                        <h2 class="main-menu__subtitle">STACK, CLEAR, REPEAT</h2>
+                        <h1 class="main-menu__title">
+                            <span class="main-menu__title__letter t1">T</span>
+                            <span class="main-menu__title__letter e">e</span>
+                            <span class="main-menu__title__letter t2">t</span>
+                            <span class="main-menu__title__letter r">r</span>
+                            <span class="main-menu__title__letter i">i</span>
+                            <span class="main-menu__title__letter s">s</span>
+                        </h1>
+                    </div>
+                    <div class="flex column gap-4">
+                        <button id="main-menu-play">Play</button>
+                        <button id="main-menu-custom-game">Custom Game</button>
+                        <button id="main-menu-how-to-play">How to Play</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="custom-game-page" class="custom-game">
-            <h1>Custom Game</h1>
-            <!-- Need to include all of the changable settings -->
+            <div class="custom-game__header">
+                <button id="custom-game-back" aria-label="Back to main menu" class="inverted">
+                    <span aria-hidden="true">←</span>
+                </button>
+                <h2 class="custom-game__title">Custom Game</h2>
+            </div>
+
+            <form id="custom-game-form" class="custom-game__container">
+                <div class="custom-game__form">
+                    <fieldset class="custom-game__section card">
+                        <p class="card__title">Board</p>
+                        <div class="card__content flex row gap-4 full">
+                            <div class="flex column gap-2 full">
+                                <label for="width" class="label full sm">Width</label>
+                                <input
+                                    class="value"
+                                    type="number"
+                                    id="width"
+                                    name="width"
+                                    value="10"
+                                    min="4"
+                                    max="20"
+                                    required
+                                />
+                            </div>
+                            <div class="flex column gap-2 full">
+                                <label for="height" class="label full sm">Height</label>
+                                <input
+                                    class="value"
+                                    type="number"
+                                    id="height"
+                                    name="height"
+                                    value="20"
+                                    min="10"
+                                    max="40"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="custom-game__section card">
+                        <p class="card__title">Speed &amp; Leveling</p>
+                        <div class="card__content">
+                            <div class="custom-game__field">
+                                <label for="current_level">Starting level</label>
+                                <input
+                                    type="number"
+                                    id="current_level"
+                                    name="current_level"
+                                    value="0"
+                                    min="0"
+                                    max="20"
+                                />
+                            </div>
+                        </div>
+                        <div class="custom-game__field range">
+                            <label for="speed_multiplier">
+                                <span>Speed multiplier</span>
+                                <output for="speed_multiplier" id="speed_multiplier-out"
+                                    >1.0x</output
+                                >
+                            </label>
+                            <input
+                                type="range"
+                                id="speed_multiplier"
+                                name="speed_multiplier"
+                                value="1.0"
+                                min="0.5"
+                                max="3"
+                                step="0.1"
+                                oninput="
+                                    document.getElementById('speed_multiplier-out').textContent =
+                                        Number(this.value).toFixed(1) + 'x'
+                                "
+                            />
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="custom-game__section card">
+                        <p class="card__title">Piece queue</p>
+                        <div class="card__content flex column gap-4 full">
+                            <div class="custom-game__field">
+                                <label for="next_goal_multiplier">Rows to next level</label>
+                                <input
+                                    type="number"
+                                    id="next_goal_multiplier"
+                                    name="next_goal_multiplier"
+                                    value="10"
+                                    min="1"
+                                    max="50"
+                                />
+                            </div>
+                            <div class="custom-game__field range">
+                                <label for="soft_drop_speed_multiplier">
+                                    Soft drop multiplier
+                                    <output
+                                        for="soft_drop_speed_multiplier"
+                                        id="soft_drop_speed_multiplier-out"
+                                        >1.0x</output
+                                    >
+                                </label>
+                                <input
+                                    type="range"
+                                    id="soft_drop_speed_multiplier"
+                                    name="soft_drop_speed_multiplier"
+                                    value="1.0"
+                                    min="1"
+                                    max="20"
+                                    step="0.5"
+                                    oninput="
+                                        document.getElementById(
+                                            'soft_drop_speed_multiplier-out',
+                                        ).textContent = Number(this.value).toFixed(1) + 'x'
+                                    "
+                                />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="custom-game__section card">
+                        <p class="card__title">Pieces</p>
+                        <div class="card__content flex column gap-4 full">
+                            <div class="custom-game__field">
+                                <label for="randomizer">Piece randomizer</label>
+                                <!-- option values should match your RandomizerType enum variants -->
+                                <select id="randomizer" name="randomizer">
+                                    <option value="SevenBag">7-bag</option>
+                                    <option value="Random">Fully random</option>
+                                    <option value="Classic">Classic (TGM)</option>
+                                </select>
+                            </div>
+                            <div class="custom-game__field range">
+                                <label for="max_piece_queue_size">
+                                    Next piece preview count
+                                    <output for="max_piece_queue_size" id="max_piece_queue_size-out"
+                                        >3</output
+                                    >
+                                </label>
+                                <input
+                                    type="range"
+                                    id="max_piece_queue_size"
+                                    name="max_piece_queue_size"
+                                    value="3"
+                                    min="1"
+                                    max="6"
+                                    step="1"
+                                    oninput="
+                                        document.getElementById(
+                                            'max_piece_queue_size-out',
+                                        ).textContent = this.value
+                                    "
+                                />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="custom-game__section card">
+                        <p class="card__title">Game Over</p>
+                        <div class="card__content flex column gap-4 full">
+                            <div class="custom-game__field">
+                                <label for="top_out">Top out rule</label>
+                                <!-- option values should match your TopOutType enum variants -->
+                                <select id="top_out" name="top_out">
+                                    <option value="BlockOut">Block out</option>
+                                    <option value="LockOut">Lock out</option>
+                                    <option value="PartialLockOut">Partial lock out</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="custom-game__section card">
+                        <p class="card__title">Lock Delay</p>
+                        <div class="card__content flex column gap-4">
+                            <div class="custom-game__field">
+                                <label for="lock_delay_type">Type</label>
+                                <!-- option values should match your LockDelayType enum variants -->
+                                <select id="lock_delay_type" name="lock_delay_type">
+                                    <option value="Infinite">Infinite</option>
+                                    <option value="Extended">Extended</option>
+                                    <option value="Classic">Classic</option>
+                                </select>
+                            </div>
+                            <div class="flex row gap-4">
+                                <div class="flex column gap-2 full">
+                                    <label for="lock_delay_timer" class="label full sm"
+                                        >Timer (ms)</label
+                                    >
+                                    <input
+                                        class="value full"
+                                        type="number"
+                                        id="lock_delay_timer"
+                                        name="lock_delay_timer"
+                                        value="500"
+                                        min="0"
+                                        step="50"
+                                    />
+                                </div>
+                                <div class="flex column gap-2 full">
+                                    <label for="lock_delay_max_resets" class="label full sm"
+                                        >Max resets</label
+                                    >
+                                    <input
+                                        class="value full"
+                                        type="number"
+                                        id="lock_delay_max_resets"
+                                        name="lock_delay_max_resets"
+                                        value="15"
+                                        min="0"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="flex row gap-4 mt-4">
+                    <button type="submit" id="custom-game-start" class="full">Start Game</button>
+                    <button type="reset" id="custom-game-reset" class="inverted">Reset</button>
+                </div>
+            </form>
         </div>
 
-        <div id="how-to-play-modal" class="how-to-play">
-            <h1>How to Play</h1>
-            <!-- Need to include all of the instructions -->
-        </div>
-
-        <!-- Game page
-      Ability to:
-        - (required) Pause Game (Modal)
-        - (required) Lose Game  (Modal)
-      Must Show:
-        - (required) Holding Piece
-        - (required) Next Pieces
-        - (required) Level
-        - (required) Goal (number of pieces to match to get to next level)
-        - (required) Score
-        - (required) Pause Button
-        - (optional) coins -- this can be done later
-      Examples:
-        https://www.emmawang.me/ui?lightbox=dataItem-j0idzdxn
-        https://www.pinterest.ca/fduy96/tetris-ui/
-        http://www.douvilleart.com/new-page-81
-    -->
         <div id="game-page" class="game">
             <div class="game__bar">
                 <h2>Tetris</h2>
@@ -113,16 +308,6 @@
             </div>
         </div>
 
-        <!-- Pause Modal
-      Required:
-        - Title (Game Pause)
-        - Control Music Slider
-        - Control Sound Slider
-        - Restart Game
-        - Close Model
-      Examples:
-        https://www.pinterest.co.uk/pin/838443655599579811/
-    -->
         <div id="pause-game-modal" class="modal">
             <div class="modal__content flex center middle">
                 <div class="card pause flex center middle">
@@ -137,24 +322,178 @@
             </div>
         </div>
 
-        <!-- Game Over Modal
-      Required:
-        - Score Board
-          - Name + Number
-        - Play Again
-        - Share High Score
-        - Go To Main Menu
-      Examples:
-        https://dribbble.com/shots/1216488-Tetris-Game-Over
-    -->
-        <div id="game-over-modal" class="modal card game-over">
-            <h1 class="card__title">Game Over</h1>
-            <div class="card__content">
-                <h3 class="card__content__title">High Scores</h3>
-                <ul class="card__list"></ul>
+        <div id="how-to-play-modal" class="modal flex center middle">
+            <div class="flex center middle screen">
+                <div class="card how-to-play">
+                    <div class="content">
+                        <button id="how-to-play-back" class="how-to-play__close inverted">✕</button>
+                        <div class="flex row full flex middle">
+                            <h2 class="modal__title">How to Play</h2>
+                        </div>
+
+                        <div class="flex column gap-4">
+                            <p class="modal__paragraph">
+                                Tetris is a puzzle game where you stack falling pieces (called
+                                "tetrominoes") to form complete horizontal lines. When a line is
+                                filled, it clears and you earn points. The game ends when pieces
+                                stack all the way to the top.
+                            </p>
+
+                            <div class="flex column gap-4">
+                                <h2 class="modal__section-title">Desktop Controls</h2>
+
+                                <div class="card">
+                                    <h3 class="card__title">Rotation</h3>
+                                    <div class="card__content">
+                                        <p>
+                                            <span class="modal__key">Numpad1/5/9</span> or
+                                            <span class="modal__key">X</span> or
+                                            <span class="modal__key">↑</span> — Rotate Clockwise
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Numpad7/3</span> or
+                                            <span class="modal__key">Ctrl</span> or
+                                            <span class="modal__key">Z</span> — Rotate
+                                            Counter-Clockwise
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <h3 class="card__title">Movement</h3>
+                                    <div class="card__content">
+                                        <p>
+                                            <span class="modal__key">Numpad4</span> or
+                                            <span class="modal__key">←</span> — Move Left
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Numpad6</span> or
+                                            <span class="modal__key">→</span> — Move Right
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Numpad2</span> or
+                                            <span class="modal__key">↓</span> — Soft Drop
+                                            (accelerate)
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Numpad8</span> or
+                                            <span class="modal__key">Space</span> or
+                                            <span class="modal__key">Left Click</span> — Hard Drop
+                                            (instant)
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <h3 class="card__title">Special</h3>
+                                    <div class="card__content">
+                                        <p>
+                                            <span class="modal__key">Numpad0</span> or
+                                            <span class="modal__key">C</span> or
+                                            <span class="modal__key">Shift</span> — Hold Piece (save
+                                            for later)
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Esc</span> — Pause/Resume Game
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex column gap-4">
+                                <h2 class="modal__section-title">Mobile / Touch Controls</h2>
+
+                                <div class="card">
+                                    <h3 class="card__title">Swipe Controls</h3>
+                                    <div class="card__content">
+                                        <p>
+                                            <span class="modal__key">Swipe Left/Right</span> — Move
+                                            Piece
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Swipe Down</span> — Soft Drop
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Tap Right</span> — Rotate
+                                            Clockwise
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Tap Left</span> — Rotate
+                                            Counter-Clockwise
+                                        </p>
+                                        <p>
+                                            <span class="modal__key">Tap Hold Canvas</span> — Hold
+                                            Piece
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal__tips">
+                                <h2 class="modal__section-title">Pro Tips</h2>
+                                <ul class="modal__tips-list">
+                                    <li class="modal__tips-item">
+                                        Use the numpad for faster rotation — it's more ergonomic for
+                                        some players
+                                    </li>
+                                    <li class="modal__tips-item">
+                                        Hold pieces when you see a good setup for a big combo
+                                    </li>
+                                    <li class="modal__tips-item">
+                                        Keep your stack low and centered to maximize future moves
+                                    </li>
+                                    <li class="modal__tips-item">
+                                        Clear lines as they form — don't let them stack up
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- </div> -->
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button id="game-over-exit">🏠</button>
-            <button id="game-over-restart">↺</button>
+        </div>
+
+        <div id="game-over-modal" class="modal flex center middle">
+            <div class="flex center middle screen">
+                <div class="card game-over">
+                    <div class="game-over__hero flex middle center full column gap-2">
+                        <h2 class="game-over__hero--title card__title sm">Game Over</h2>
+                        <p id="game-over-score" class="game-over__hero--score">1000</p>
+                        <div class="flex row gap-4 between">
+                            <div class="game-over__hero--subtitle">
+                                <span>Level</span>
+                                <span id="game-over-level">3</span>
+                            </div>
+                            <div class="game-over__hero--subtitle">
+                                <span id="game-over-row">7</span>
+                                <span>rows</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card__content">
+                        <h3 class="game-over__title">High Scores</h3>
+                        <ol class="game-over__list">
+                            <li class="flex center between">
+                                <div class="flex row center between gap-4">
+                                    <span class="game-over__list--number">1</span>
+                                    <span>Maya</span>
+                                </div>
+                                <span>9,000</span>
+                            </li>
+                        </ol>
+                        <div class="flex gap-2 column">
+                            <h3 class="game-over__title">Save your score</h3>
+                            <div class="flex gap-2 row full center">
+                                <input type="text" class="full"/>
+                                <button class="inverted sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="game-over-restart">Play Again</button>
+                    <button id="game-over-exit" class="inverted">🏠 Home</button>
+                </div>
+            </div>
         </div>
 
         <script src="./bootstrap.js"></script>

@@ -1,7 +1,7 @@
 import Page from "./Page";
 import { GetElementById } from "../util";
 import StateManager from "../StateManager";
-import { TetrisConfig } from "Tetris";
+import { TetrisConfig } from "../Tetris";
 
 export default class GamePage extends Page {
     

@@ -41,6 +41,10 @@ export default class StateManager {
         return StateManager.instance!;
     }
 
+    getCurrentGameScore() {
+        return this.game!.score
+    }
+
     GoToMainMenu() {
         this.mainMenu.show();
         this.gamePage.hide();
@@ -97,6 +101,16 @@ export default class StateManager {
         }
     }
 
+    GoToGameAndRestart() {
+        this.game = new Tetris(Game.new(), this.gamePage.CalculateTetrisConfig());
+        this.GoToGame();
+        if (!this.game) {
+            throw new Error('[GoToGameAndResumeGame]: Game MUST exist for the game to be resumed');
+        } else {
+            this.game.startTetris();
+        }
+    }
+
     private GoToPauseGameModal() {
         this.mainMenu.hide();
         this.gamePage.show();
@@ -114,9 +128,6 @@ export default class StateManager {
     }
 
     private GoToGameOverModal() {
-        this.mainMenu.hide();
-        this.gamePage.show();
-        this.pauseModal.hide();
         this.gameOverModal.show();
     }
 

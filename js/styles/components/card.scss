@@ -16,4 +16,8 @@
             background-color: $color-surface;
         }
     }
+
+    .card {
+        background-color: $nested-color-surface;
+    }
 }

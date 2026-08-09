@@ -1,3 +1,49 @@
 #game-over-modal {
-    display: none;
+    display: block;
+}
+
+.game-over {
+    width: 300px;
+
+    &__hero {
+        border-bottom: 1px solid $color-border;
+        padding-bottom: 1rem;
+
+        &--title {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 700;
+            font-size: 1em;
+            color: $color-accent-text;
+        }
+
+        &--score {
+            font-size: 3em;
+            color: $color-text;
+            padding: 0px;
+        }
+
+        &--subtitle {
+            font-size: 1em;
+            color: $color-text-secondary;
+        }
+    }
+
+    &__title {
+        font-size: 1em;
+        color: $color-text-secondary;
+    }
+
+    &__list {
+        padding: 0.25rem 1rem;
+
+        &--number {
+            color: $color-text-secondary;
+        }
+    }
+
+    .card__content {
+        border-bottom: 1px solid $color-border;
+        padding-bottom: 1rem;
+    }
 }

@@ -16,6 +16,11 @@ button {
     box-shadow: $button-box-shadow-normal;
     transition: $button-transition;
 
+    &.sm {
+        padding: 4px;
+        font-size: 1em;
+    }
+
     &.inverted {
         color: $color-text-muted;
         border: none;

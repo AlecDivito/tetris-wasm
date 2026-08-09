@@ -27,11 +27,11 @@ export default class PauseModal extends Page {
     }
 
     private restartGame = () => {
-        throw new Error("TODO: implement restart Game Button");
+        StateManager.GetInstance().GoToGameAndRestart();
     }
 
     private controlPage = () => {
-        throw new Error("TODO: implement control Page Button");
+        StateManager.GetInstance().PushToHowToPlayModal();
     }
     
     private exitGame = () => {

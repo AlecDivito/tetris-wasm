@@ -80,6 +80,13 @@ class Tetris {
     }
 
     /**
+     * Get the score
+     */
+    get score() {
+        return this.tetrisGame.get_score()
+    }
+
+    /**
      * Get the height of the board
      */
     private get height() {
@@ -191,11 +198,7 @@ class Tetris {
         }
 
         if (this.inputController.Input.Escape || this.inputController.Input.KeyP) {
-            if (this.isRunning) {
-                StateManager.GetInstance().GoToPauseModalAndPauseGame();
-            } else {
-                StateManager.GetInstance().GoToGameAndResumeGame()
-            }
+            StateManager.GetInstance().GoToPauseModalAndPauseGame();
         }
         // handle all the queued events on the input controller
         const touchControls = this.inputController.getTouchGridArea(this.config.cellSize, this.tetrisGame.get_piece_bounding_box());
