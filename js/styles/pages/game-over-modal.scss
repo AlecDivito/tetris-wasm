@@ -2,6 +2,10 @@
     display: block;
 }
 
+#game-over-score-list-loading {
+    padding: 1rem 0rem;
+}
+
 .game-over {
     width: 300px;
 
@@ -36,7 +40,9 @@
 
     &__list {
         padding: 0.25rem 1rem;
-
+        max-height: 120px;
+        overflow: scroll;
+        
         &--number {
             color: $color-text-secondary;
         }

@@ -45,6 +45,15 @@ export default class StateManager {
         return this.game!.score
     }
 
+    getCurrentGameLevel() {
+        return this.game!.level
+    }
+
+
+    getCurrentGameRowCompleted() {
+        return this.game!.row
+    }
+
     GoToMainMenu() {
         this.mainMenu.show();
         this.gamePage.hide();

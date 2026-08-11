@@ -23,14 +23,14 @@
                     </div>
                     <div class="flex column gap-4">
                         <button id="main-menu-play">Play</button>
-                        <button id="main-menu-custom-game">Custom Game</button>
+                        <button id="main-menu-custom-game" style="display: none">Custom Game</button>
                         <button id="main-menu-how-to-play">How to Play</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="custom-game-page" class="custom-game">
+        <div id="custom-game-page" class="custom-game" style="display: none">
             <div class="custom-game__header">
                 <button id="custom-game-back" aria-label="Back to main menu" class="inverted">
                     <span aria-hidden="true">←</span>
@@ -274,15 +274,15 @@
                         <div class="card gap-0">
                             <h3 class="flex row gap-2 between">
                                 <span class="label">Score</span>
-                                <span class="value" id="score">100000</span>
+                                <span class="value" id="score">0</span>
                             </h3>
                             <h3 class="flex row gap-2 between">
                                 <span class="label">level</span>
-                                <span class="value" id="level">100000</span>
+                                <span class="value" id="level">0</span>
                             </h3>
                             <h3 class="flex row gap-2 between">
                                 <span class="label">Rows</span>
-                                <span class="value" id="rows_completed">100000</span>
+                                <span class="value" id="rows_completed">0</span>
                             </h3>
                         </div>
                         <button id="game-pause">⏸</button>
@@ -454,7 +454,7 @@
             </div>
         </div>
 
-        <div id="game-over-modal" class="modal flex center middle">
+        <div id="game-over-modal" class="modal flex center middle" style="display: none">
             <div class="flex center middle screen">
                 <div class="card game-over">
                     <div class="game-over__hero flex middle center full column gap-2">
@@ -463,31 +463,26 @@
                         <div class="flex row gap-4 between">
                             <div class="game-over__hero--subtitle">
                                 <span>Level</span>
-                                <span id="game-over-level">3</span>
+                                <span id="game-over-level">10</span>
                             </div>
                             <div class="game-over__hero--subtitle">
-                                <span id="game-over-row">7</span>
-                                <span>rows</span>
+                                <span id="game-over-row">10</span>
+                                <span>Rows</span>
                             </div>
                         </div>
                     </div>
                     <div class="card__content">
                         <h3 class="game-over__title">High Scores</h3>
-                        <ol class="game-over__list">
-                            <li class="flex center between">
-                                <div class="flex row center between gap-4">
-                                    <span class="game-over__list--number">1</span>
-                                    <span>Maya</span>
-                                </div>
-                                <span>9,000</span>
-                            </li>
-                        </ol>
-                        <div class="flex gap-2 column">
+                        <div id="game-over-score-list-loading">Loading...</div>
+                        <div id="game-over-score-list-fail">Failed to fetch high scores.</div>
+                        <ol id="game-over-score-list" class="game-over__list flex gap-2 column"></ol>
+                        <div id="game-over-form" class="flex gap-2 column">
                             <h3 class="game-over__title">Save your score</h3>
-                            <div class="flex gap-2 row full center">
-                                <input type="text" class="full"/>
+                            <p id="game-over-saved-score-text" style="display: none;">Saved!</p>
+                            <form id="game-over-save-score-form" class="flex gap-2 row full center">
+                                <input type="text" name="player" class="full" required />
                                 <button class="inverted sm">Save</button>
-                            </div>
+                            </form>
                         </div>
                     </div>
                     <button id="game-over-restart">Play Again</button>
@@ -495,6 +490,16 @@
                 </div>
             </div>
         </div>
+
+        <template id="high-score-row">
+            <li class="flex center between">
+                <div class="flex row center between gap-4">
+                    <span data-label="number" class="game-over__list--number">1</span>
+                    <span data-label="name">Maya</span>
+                </div>
+                <span data-label="score">9,000</span>
+            </li>
+        </template>
 
         <script src="./bootstrap.js"></script>
     </body>

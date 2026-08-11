@@ -87,6 +87,20 @@ class Tetris {
     }
 
     /**
+     * Get the level
+     */
+    get level() {
+        return this.tetrisGame.get_level()
+    }
+
+    /**
+     * Get the row
+     */
+    get row() {
+        return this.tetrisGame.get_rows_completed()
+    }
+
+    /**
      * Get the height of the board
      */
     private get height() {
