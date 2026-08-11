@@ -3,6 +3,9 @@ button {
     cursor: pointer;
     border: none;
     outline: none;
+    font-family: $font;
+    font-weight: bold;
+    font-size: 1em;
 
     top: $button-position-top-normal;
     background: $button-background-color;
@@ -12,14 +15,37 @@ button {
     border-radius: $button-border-radius;
     box-shadow: $button-box-shadow-normal;
     transition: $button-transition;
-}
 
-button:hover {
-	box-shadow: $button-box-shadow-hover;
-    top: $button-position-top-hover;
-}
+    &.sm {
+        padding: 4px;
+        font-size: 1em;
+    }
 
-button:active {
-	box-shadow: $button-box-shadow-active;
-    top: $button-position-top-active;
+    &.inverted {
+        color: $color-text-muted;
+        border: none;
+        background-color: none;
+        box-shadow: none !important;
+        background: none !important;
+
+        &:hover {
+            color: $color-text;
+            top: 0px;
+        }
+
+        &:active {
+            color: $color-text;
+            top: 0px;
+        }
+    }
+
+    &:hover {
+        box-shadow: $button-box-shadow-hover;
+        top: $button-position-top-hover;
+    }
+
+    &:active {
+        box-shadow: $button-box-shadow-active;
+        top: $button-position-top-active;
+    }
 }

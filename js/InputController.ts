@@ -6,6 +6,11 @@ export default class InputController {
     private canvasElement: HTMLCanvasElement;
     private holdPieceCanvas: HTMLCanvasElement;
 
+    // TODO: use controller controls
+    //       https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
+    // TODO: add mouse tracking
+
+
     private input: { [key: string]: boolean } = {
         /**
          * Keyboard input
@@ -21,6 +26,7 @@ export default class InputController {
         KeyC: false,
         KeyX: false,
         KeyZ: false,
+        KeyP: false,
         Numpad0: false,
         Numpad1: false,
         Numpad2: false,
@@ -76,21 +82,22 @@ export default class InputController {
     }
 
     private keyMap: { [key: number]: string } = {
-        16:  "ShiftLeft",
-        17:  "ControlLeft",
-        27:  "Escape",
-        32:  "Space",
-        37:  "ArrowLeft",
-        38:  "ArrowUp",
-        39:  "ArrowRight",
-        40:  "ArrowDown",
-        67:  "KeyC",
-        88:  "KeyX",
-        90:  "KeyZ",
-        96:  "Numpad0",
-        97:  "Numpad1",
-        98:  "Numpad2",
-        99:  "Numpad3",
+        16: "ShiftLeft",
+        17: "ControlLeft",
+        27: "Escape",
+        32: "Space",
+        37: "ArrowLeft",
+        38: "ArrowUp",
+        39: "ArrowRight",
+        40: "ArrowDown",
+        67: "KeyC",
+        88: "KeyX",
+        90: "KeyZ",
+        80: "KeyP",
+        96: "Numpad0",
+        97: "Numpad1",
+        98: "Numpad2",
+        99: "Numpad3",
         100: "Numpad4",
         101: "Numpad5",
         102: "Numpad6",
@@ -99,6 +106,26 @@ export default class InputController {
         105: "Numpad9",
         112: "F1",
     };
+
+    private hasRecordedClockwiseRotation = false
+    private hasRecordedCounterCloseWiseRotation = false
+
+    private clockwiseRotationKeys = [
+        'Numpad1',
+        'Numpad5',
+        'Numpad9',
+        'KeyX',
+        'ArrowUp',
+        'tapRight',
+    ]
+
+    private counterClockwiseRotationKeys = [
+        'Numpad7',
+        'Numpad3',
+        'ControlLeft',
+        'KeyZ',
+        'tapLeft',
+    ]
 
     /**
      * Create a Input controller
@@ -172,7 +199,7 @@ export default class InputController {
                 }
                 return false;
             }
-            
+
             const x = event.targetTouches[0].clientX - this.canvasElement.offsetLeft;
             const y = event.targetTouches[0].clientY - this.canvasElement.offsetTop;
             if (event.type === 'touchstart') {
@@ -216,7 +243,7 @@ export default class InputController {
 
         this.canvasElement.addEventListener('touchmove', updateTouch, { passive: true });
         this.canvasElement.addEventListener('touchstart', updateTouch, { passive: true });
-        this.canvasElement.addEventListener('touchend', updateTouch, { passive: true});
+        this.canvasElement.addEventListener('touchend', updateTouch, { passive: true });
         this.holdPieceCanvas.addEventListener('click', () => this.input.tapHold = true);
 
         this.listening = true;
@@ -239,11 +266,13 @@ export default class InputController {
     public getEventQueue(): Uint8Array /*Action[]*/ {
         const i = this.input;
         const eventQueue: Action[] = [];
-        if (i.Numpad1 || i.Numpad5 || i.Numpad9 || i.KeyX || i.ArrowUp || i.tapRight) {
+        if ((i.Numpad1 || i.Numpad5 || i.Numpad9 || i.KeyX || i.ArrowUp || i.tapRight) && !this.hasRecordedClockwiseRotation) {
             eventQueue.push(Action.RotateClockWise);
+            this.hasRecordedClockwiseRotation = true
         }
-        if (i.Numpad3 || i.Numpad7 || i.ControlLeft || i.KeyZ || i.tapLeft) {
+        if ((i.Numpad3 || i.Numpad7 || i.ControlLeft || i.KeyZ || i.tapLeft) && !this.hasRecordedCounterCloseWiseRotation) {
             eventQueue.push(Action.RotateCounterClockWise);
+            this.hasRecordedCounterCloseWiseRotation = true
         }
         if (i.Numpad8 || i.Space || i.leftClick || i.dragDown) {
             eventQueue.push(Action.HardDrop);
@@ -287,7 +316,7 @@ export default class InputController {
         return byteEventQueue;
     }
 
-    public getTouchGridArea(cellSize: number, boundingBox: number): {x: number, y: number} | null {
+    public getTouchGridArea(cellSize: number, boundingBox: number): { x: number, y: number } | null {
         let offset = boundingBox / 2;
         if (this.mouseInput.updated && this.touchEventFirst === false) {
             let x = this.mouseInput.x,
@@ -302,9 +331,9 @@ export default class InputController {
             x = Math.round(x / cellSize - offset);
             y = Math.round(y / cellSize - offset);
             this.touchInput.updated = false;
-            return {x,y};
+            return { x, y };
         }
-        return null; 
+        return null;
     }
 
     /**
@@ -313,6 +342,13 @@ export default class InputController {
     private keyboardEvent = (event: KeyboardEvent) => {
         const code = this.getKeyCode(event);
         this.input[code] = event.type === "keydown";
+
+        if (event.type === "keyup" && this.clockwiseRotationKeys.includes(code)) {
+            this.hasRecordedClockwiseRotation = false
+        }
+        if (event.type === "keyup" && this.counterClockwiseRotationKeys.includes(code)) {
+            this.hasRecordedCounterCloseWiseRotation = false
+        }
     }
 
     /**

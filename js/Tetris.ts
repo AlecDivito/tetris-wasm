@@ -14,6 +14,28 @@ export interface TetrisConfig {
     previewCellSize: number;
 }
 
+// TODO WHEN DONE (OR BASICITY DONE):
+// CHECK OUT https://shop.tetris.com/
+// THIS COULD BE AN IDEA  TO HELP MONETIZE A WEBSITE
+
+// TODO: Sound effect on by default
+//       effect for rotation, movement, landing on surface, touching a wall,
+//       locking, line clear, game over
+
+// TODO: Must have music (song must be Korobeiniki)
+//       music on by default
+
+// TODO: when starting game or resuming a game, trigger a count down timer from 3
+
+// TODO: Game must have this notice when the game starts (XXXX is the year the game was created)
+// Game © 1985~XXXX Game Holding.
+// Game logos, Game theme song and Tetriminos are trademarks of Game Holding.
+// The Game trade dress is owned by Game Holding.
+// Licensed to The Game Company.
+// Game Game Design by Alexey Pajitnov.
+// Game Logo Design by Roger Dean.
+// All Rights Reserved.
+
 /**
  * Tetris is a small layer that surrounds our tetris game logic in web assembly.
  * Tetris's only job is to run the main loop of the program and update the game
@@ -55,6 +77,27 @@ class Tetris {
      */
     get isGameOver() {
         return this.tetrisGame.is_game_over();
+    }
+
+    /**
+     * Get the score
+     */
+    get score() {
+        return this.tetrisGame.get_score()
+    }
+
+    /**
+     * Get the level
+     */
+    get level() {
+        return this.tetrisGame.get_level()
+    }
+
+    /**
+     * Get the row
+     */
+    get row() {
+        return this.tetrisGame.get_rows_completed()
     }
 
     /**
@@ -168,19 +211,15 @@ class Tetris {
             return;
         }
 
-        // if (this.inputController.Input.Escape) {
-        //     if (this.isRunning) {
-        //         StateManager.GetInstance().GoToPauseModalAndPauseGame();
-        //     } else {
-        //         StateManager.GetInstance().GoToGameAndResumeGame()
-        //     }
-        // }
+        if (this.inputController.Input.Escape || this.inputController.Input.KeyP) {
+            StateManager.GetInstance().GoToPauseModalAndPauseGame();
+        }
         // handle all the queued events on the input controller
         const touchControls = this.inputController.getTouchGridArea(this.config.cellSize, this.tetrisGame.get_piece_bounding_box());
         if (touchControls) {
             this.tetrisGame.touch_event_handler(touchControls.x, touchControls.y);
         }
-        this.tetrisGame.event_handler(this.inputController.getEventQueue());
+        this.tetrisGame.byte_event_handler(this.inputController.getEventQueue());
         const boardMerged = this.tetrisGame.update(performance.now());
         this.drawGrid();
         this.drawCells();
@@ -210,7 +249,7 @@ class Tetris {
      */
     private drawGrid() {
         this.ctx.beginPath();
-        this.ctx.strokeStyle = this.config.gridColor;
+        this.ctx.strokeStyle = '#000'// this.config.gridColor;
 
         // Vertical lines
         for (let i = 0; i <= this.width; i++) {
@@ -244,9 +283,9 @@ class Tetris {
             for (let col = 0; col < this.width; col++) {
                 const index = this.getIndex(row, col);
                 if (cells[index] === Cell.EMPTY && row < this.totalHeight - this.boardHeight) {
-                    this.ctx.fillStyle = '#132456';
+                    this.ctx.fillStyle = '#000';
                 } else {
-                    this.ctx.fillStyle = this.getColor(cells[index]);
+                    this.ctx.fillStyle = this.getColor(cells[index], '#000');
                 }
 
                 this.drawCell(row, col);
@@ -263,7 +302,7 @@ class Tetris {
                         `${this.getIndex(row, col)}`,
                         col * (this.config.cellSize + 1) + 1,
                         (row - this.offsetHeight) * (this.config.cellSize + 1) +
-                            this.config.cellSize,
+                        this.config.cellSize,
                     );
                 }
             }
@@ -316,7 +355,7 @@ class Tetris {
         let maxY = this.config.previewCellSize * 4;
 
         // draw in background
-        context.fillStyle = '#000000';
+        context.fillStyle = '#1e2130';
         context.fillRect(0, 0, maxX, maxY * cells.length);
 
         cells.forEach(cell => {
@@ -337,7 +376,7 @@ class Tetris {
                     if (pieces[i] !== Cell.EMPTY) {
                         context.fillStyle = this.getColor(cell);
                     } else {
-                        context.fillStyle = '#000000';
+                        context.fillStyle = '#1e2130';
                     }
                     context.fillRect(
                         minX + (col * (this.config.previewCellSize + 1) + 1),
@@ -361,7 +400,7 @@ class Tetris {
         const context = holdCanvas.getContext('2d')!;
         // draw in background
         context.beginPath();
-        context.fillStyle = '#000000';
+        context.fillStyle = '#1e2130'; // TODO: CSS variables
         context.fillRect(0, 0, 150, 150);
 
         let boundingBox = 3;
@@ -381,7 +420,7 @@ class Tetris {
                 if (pieces[i] !== Cell.EMPTY) {
                     context.fillStyle = this.getColor(holdCell);
                 } else {
-                    context.fillStyle = '#000000';
+                    context.fillStyle = '#1e2130';
                 }
                 context.fillRect(
                     col * (this.config.previewCellSize + 1) + 1,
@@ -422,10 +461,10 @@ class Tetris {
      * Given the type of cell that needs coloring, return a hex color
      * @param cell type of cell
      */
-    private getColor(cell: Cell): string {
+    private getColor(cell: Cell, emptyOverride?: string): string {
         switch (cell) {
             case Cell.EMPTY:
-                return '#000'; // black
+                return emptyOverride ?? '#1e2130'; // black
             case Cell.I:
                 return '#00FFFF'; // cyan
             case Cell.O:
@@ -441,7 +480,7 @@ class Tetris {
             case Cell.L:
                 return '#FFA500'; // Orange
             default:
-                return '#FFFFFF'; // white
+                return emptyOverride ?? '#1e2130'; // white
         }
     }
 }
@@ -454,32 +493,32 @@ function getCells(cell: Cell) {
     switch (cell) {
         case Cell.O:
             return [Cell.O, Cell.O,
-                    Cell.O, Cell.O];
+            Cell.O, Cell.O];
         case Cell.I:
             return [Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY,
-                    Cell.I,     Cell.I,     Cell.I,     Cell.I,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.I, Cell.I, Cell.I, Cell.I,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.T:
             return [Cell.EMPTY, Cell.T, Cell.EMPTY,
-                    Cell.T, Cell.T, Cell.T,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.T, Cell.T, Cell.T,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.S:
             return [Cell.EMPTY, Cell.S, Cell.S,
-                    Cell.S, Cell.S, Cell.EMPTY,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.S, Cell.S, Cell.EMPTY,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.Z:
             return [Cell.Z, Cell.Z, Cell.EMPTY,
-                    Cell.EMPTY, Cell.Z, Cell.Z,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.EMPTY, Cell.Z, Cell.Z,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.J:
             return [Cell.EMPTY, Cell.EMPTY, Cell.J,
-                    Cell.J, Cell.J, Cell.J,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.J, Cell.J, Cell.J,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         case Cell.L:
             return [Cell.L, Cell.EMPTY, Cell.EMPTY,
-                    Cell.L, Cell.L, Cell.L,
-                    Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
+            Cell.L, Cell.L, Cell.L,
+            Cell.EMPTY, Cell.EMPTY, Cell.EMPTY];
         default:
             return [Cell.EMPTY];
     }

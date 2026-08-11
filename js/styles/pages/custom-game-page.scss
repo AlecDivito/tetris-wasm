@@ -1,0 +1,86 @@
+#custom-game-page {
+    display: none;
+}
+
+.custom-game {
+    background: $color-bg;
+    color: $color-text;
+    padding: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+
+    /* HEADER */
+
+    &__header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        padding: 0rem 0rem 0.5rem 0rem;
+        border-bottom: 1px solid $color-border;
+        font-family: $font;
+        font-weight: bold;
+        font-size: 1.2em;
+        margin: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    &__title {
+        font-family: $font;
+        font-size: 1em;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    /* CONTENT */
+
+    &__container {
+        margin: auto;
+        max-width: 700px;
+    }
+
+    &__form {
+        // display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 1rem;
+        margin: auto;
+
+        @media (min-width: 560px) {
+            & {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                align-items: start;
+            }
+        }
+    }
+
+    &__section {
+        border: none;
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &.range {
+            gap: 1rem;
+        }
+
+        label {
+            font-size: 0.75em;
+            color: $color-text-muted;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        output {
+            color: $color-accent;
+            font-size: 0.75em;
+        }
+    }
+
+}

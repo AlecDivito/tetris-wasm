@@ -8,3 +8,7 @@ pub mod cell;
 pub mod piece;
 pub mod point;
 pub mod game;
+pub mod config;
+mod scoring;
+pub mod locks;
+mod top_out;

@@ -1,7 +1,9 @@
 mod utils;
 pub mod tetris;
 
+#[cfg(target_arch = "wasm32")]
 extern crate web_sys;
+#[cfg(target_arch = "wasm32")]
 extern crate js_sys;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global

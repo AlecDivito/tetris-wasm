@@ -1,37 +1,96 @@
 // Colors
 $white: #fff;
 
+$bg: #14161f;
+$cards: #1e2130;
+$border1: #2a2d3a;
+$border2: #3a3d4a;
+
 // extra
 $border-radius: 0.5rem;
 $padding: 1rem;
 $margin: 1rem;
 
+$font: 'Almarai', sans-serif;
+
+// ==========================================================================
+// Tetris Color Palette
+// ==========================================================================
+
+// Base shell
+$color-bg:              #14161f; // outer page background
+$color-surface:         #1e2130; // cards, panels, modal bodies
+$color-board-bg:        #0a0b12; // board canvas background (darker than shell)
+$nested-color-surface:  rgb(42, 47, 69);
+
+// Borders
+$color-border:          #2a2d3a; // subtle dividers, card borders
+$color-border-strong:   #3a3d4a; // inputs, outlined buttons
+
+// Text
+$color-text:            #e7e7ea; // primary text
+$color-text-secondary:  #a7a9b5; // secondary text, icons
+$color-text-muted:      #7a7d8c; // labels, captions, placeholders
+
+// Accent (primary actions: Play, Resume, Play again)
+$color-accent:          #26D9D9; // cyan
+$color-accent-darker:   #1c9c9c; // cyan-darker
+$color-accent-text:     #0a2626; // text on top of accent-filled buttons
+$color-accent-tint:     rgba(38, 217, 217, 0.12); // highlighted row / subtle bg
+
+// Piece colors (standard Tetris piece-to-color mapping)
+$color-piece-i:  #26D9D9; // I - cyan
+$color-piece-o:  #F2C94C; // O - yellow
+$color-piece-t:  #9B6BDB; // T - purple
+$color-piece-s:  #6FCF97; // S - green
+$color-piece-z:  #EB5757; // Z - red
+$color-piece-j:  #4D8FDE; // J - blue
+$color-piece-l:  #F2994A; // L - orange
+
+$piece-colors: (
+  i: $color-piece-i,
+  o: $color-piece-o,
+  t: $color-piece-t,
+  s: $color-piece-s,
+  z: $color-piece-z,
+  j: $color-piece-j,
+  l: $color-piece-l,
+);
+
+// Overlays
+$color-overlay: rgba(0, 0, 0, 0.55); // modal backdrop (pause / game over)
+
+// Semantic (optional, e.g. for game-over title or warnings)
+$color-danger: $color-piece-z;
+$color-success: $color-piece-s;
+
 /*******************************************************************************
  * Pages
  ******************************************************************************/
-$pause-list-margin-bottom: $margin;
+ $pause-list-margin-bottom: $margin;
 
-/*******************************************************************************
- * Components
- ******************************************************************************/
-// Card
-$card-padding: $padding;
-$card-background-color: $white;
-$card-border-radius: $border-radius;
-
-$card-title-margin: $margin 0rem;
-$card-content-margin: 0rem 0rem $margin 0rem;
-
-// Button
-$button-color: $white;
-$button-background-color: #cb4e4e;
-$button-padding: $padding;
-$button-border-radius: $border-radius;
-
-$button-transition: box-shadow .1s ease-in, top .1s ease-in;
-$button-position-top-normal: 0px;
-$button-position-top-hover: 2px;
-$button-position-top-active: 6px;
-$button-box-shadow-normal: 0 #{6px - $button-position-top-normal} #ab3c3c;
-$button-box-shadow-hover:  0 #{6px - $button-position-top-hover} #ab3c3c;
-$button-box-shadow-active: 0 #{6px - $button-position-top-active} #ab3c3c;
+ /*******************************************************************************
+  * Components
+  ******************************************************************************/
+ // Card
+ $card-padding: $padding;
+ $card-background-color: $white;
+ $card-border-radius: $border-radius;
+ 
+ $card-title-margin: 0.5rem;
+ $card-content-margin: 0rem 0rem $margin 0rem;
+ 
+ // Button
+ $button-color: $color-accent-text;
+ $button-background-color: $color-accent;
+ $button-padding: $padding;
+ $button-border-radius: $border-radius;
+ 
+ $button-transition: box-shadow .1s ease-in, top .1s ease-in;
+ $button-position-top-normal: 0px;
+ $button-position-top-hover: 2px;
+ $button-position-top-active: 6px;
+ $button-box-shadow-normal: 0 #{6px - $button-position-top-normal} $color-accent-darker;
+ $button-box-shadow-hover:  0 #{6px - $button-position-top-hover} $color-accent-darker;
+ $button-box-shadow-active: 0 #{6px - $button-position-top-active} $color-accent-darker;
+ 

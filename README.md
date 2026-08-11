@@ -58,6 +58,30 @@ off some of my skills in diffrent settings using a varity of diffrent tools. It'
 learning to roll my own webpack build process and creating my own UI. It's also
 being used to hone my rust skill set and get more comfotable with webassembly.
 
+## Whats left
+
+The majority of the tetris game is completed and works however there are some
+key options that i think would be fun to make avaliable to the game:
+
+1. Have the option to have a [Lock delay](https://tetris.fandom.com/wiki/Lock_delay)
+2. Allow for different type of [Top out's](https://tetris.fandom.com/wiki/Top_out)
+3. Provide access to the game to check when a row is completed and which rows so animations can play
+4. Have the option to configure the randomizer like he so called 7-bag random generator. I also saw the fun idea of letting a user provide their own randomizer.
+5. Implement SRS rotation and assocaited scroing as seen below.
+
+| Action                                     | Point Value |
+| -------------------------------------------|-------------|
+| Mini T-Spin                                | 100×level   |
+| Mini T-Spin Single                         | 200×level   |
+| T-Spin/Mini T-Spin Double                  | 400×level   |
+| B2B Mini T-Spin Double                     | 600×level   |
+| T-Spin Single	                             | 800×level   |
+| B2B T-Spin Single/B2B Tetris/T-Spin Double | 1,200×level |
+| T-Spin Triple                              | 1,600×level |
+| B2B T-Spin Double	                         | 1,800×level |
+| B2B T-Spin Triple	                         | 2,400×level |
+
+
 ## Resources
 Tetris Game Rules:
 - https://tetris.fandom.com/wiki/Tetris_Guideline

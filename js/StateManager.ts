@@ -4,6 +4,8 @@ import PauseModal from "./pages/PauseModal";
 import GameOverModal from "./pages/GameOverModal";
 import Tetris from "./Tetris";
 import { Game } from "../crates/pkg/rusty_web_tetris";
+import CustomGamePage from "./pages/CustomGamePage";
+import HowToPlayModal from "./pages/HowToPlayModal";
 
 /**
  * Website StateManager
@@ -17,6 +19,8 @@ export default class StateManager {
     private gamePage: GamePage;
     private pauseModal: PauseModal;
     private gameOverModal: GameOverModal;
+    private customGamePage: CustomGamePage;
+    private howToPlayModal: HowToPlayModal;
     private game?: Tetris;
 
     private constructor() {
@@ -25,6 +29,8 @@ export default class StateManager {
         this.gamePage = new GamePage();
         this.pauseModal = new PauseModal();
         this.gameOverModal = new GameOverModal();
+        this.customGamePage = new CustomGamePage();
+        this.howToPlayModal = new HowToPlayModal();
         this.game = undefined;
     }
     
@@ -35,12 +41,26 @@ export default class StateManager {
         return StateManager.instance!;
     }
 
+    getCurrentGameScore() {
+        return this.game!.score
+    }
+
+    getCurrentGameLevel() {
+        return this.game!.level
+    }
+
+
+    getCurrentGameRowCompleted() {
+        return this.game!.row
+    }
+
     GoToMainMenu() {
-        console.log('going to main')
         this.mainMenu.show();
         this.gamePage.hide();
         this.pauseModal.hide();
         this.gameOverModal.hide();
+        this.customGamePage.hide();
+        this.howToPlayModal.hide();
         /**
          * Make the game null
          */
@@ -66,12 +86,37 @@ export default class StateManager {
         this.game.startTetris();
     }
 
+    GoToCustomGame() {
+        this.mainMenu.hide();
+        this.customGamePage.show();
+        this.pauseModal.hide();
+        this.gameOverModal.hide();
+    }
+
+    PushToHowToPlayModal() {
+        this.howToPlayModal.show();
+    }
+
+    PopHowToPlayModal() {
+        this.howToPlayModal.hide();
+    }
+
     GoToGameAndResumeGame() {
         this.GoToGame();
         if (!this.game) {
             throw new Error('[GoToGameAndResumeGame]: Game MUST exist for the game to be resumed');
         } else {
             this.game.play();
+        }
+    }
+
+    GoToGameAndRestart() {
+        this.game = new Tetris(Game.new(), this.gamePage.CalculateTetrisConfig());
+        this.GoToGame();
+        if (!this.game) {
+            throw new Error('[GoToGameAndResumeGame]: Game MUST exist for the game to be resumed');
+        } else {
+            this.game.startTetris();
         }
     }
 
@@ -92,9 +137,6 @@ export default class StateManager {
     }
 
     private GoToGameOverModal() {
-        this.mainMenu.hide();
-        this.gamePage.show();
-        this.pauseModal.hide();
         this.gameOverModal.show();
     }
 
