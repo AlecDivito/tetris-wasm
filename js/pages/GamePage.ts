@@ -34,25 +34,49 @@ export default class GamePage extends Page {
     }
 
     CalculateTetrisConfig(): TetrisConfig {
-        // The goal:
-        // Make sure the tetris board always fits on the screen.
-        // It must take the height and width into account when
-        // rendering that board
-
-        // 1. Base sizing on viewport dimension limits instead of the canvas width
-        let availableHeight = window.innerHeight - 100; // Leave space for headers/footers
-        let maxCellSizeByHeight = Math.floor((availableHeight - 1) / 20) - 1; // Assuming 20 rows standard
-
-        // 2. Set bounds (Minimum: 15px, Maximum: 35px)
-        let cellSize = Math.max(15, Math.min(maxCellSizeByHeight, 35));
-
-        // 3. Scale preview size proportional to main game grid cell size
-        let previewCellSize = Math.max(10, Math.min(Math.floor(cellSize * 0.25), 15));
-
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+    
+        // -------------------------
+        // Main game board
+        // -------------------------
+        const availableHeight = viewportHeight - 100;
+        const availableWidth = viewportWidth - 40;
+    
+        const maxCellSizeByHeight = Math.floor(availableHeight / 20);
+        const maxCellSizeByWidth = Math.floor(availableWidth / 10);
+        const cellSize = Math.max(15, Math.min( maxCellSizeByHeight, maxCellSizeByWidth, 35));
+    
+        // -------------------------
+        // Preview
+        // -------------------------
+        //
+        // Desktop:
+        //   ~200px wide
+        //
+        // Mobile:
+        //   ~10vw wide
+        //
+        const previewWidth = viewportWidth >= 768 ? 160 : viewportWidth * 0.15;
+        const previewHeight = viewportHeight * 0.8;
+    
+        // A Tetris piece is at most 4 cells wide/high.
+        const previewCellSize = Math.max(5, Math.floor(Math.min(previewWidth / 4, previewHeight / 4)));
+    
+        // -------------------------
+        // Hold
+        // -------------------------
+        //
+        // Keep this a small square.
+        //
+        const holdContainerSize = viewportWidth >= 768 ? 100 : 40;
+        const holdCellSize = Math.max(2, Math.floor(holdContainerSize / 4));
+    
         return {
             gridColor: "#1e2130",
             cellSize,
-            previewCellSize
+            previewCellSize,
+            holdCellSize
         };
     }
 

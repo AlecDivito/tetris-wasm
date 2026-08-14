@@ -12,6 +12,7 @@ export interface TetrisConfig {
     gridColor: Color;
     cellSize: number;
     previewCellSize: number;
+    holdCellSize: number
 }
 
 // TODO WHEN DONE (OR BASICITY DONE):
@@ -150,14 +151,19 @@ class Tetris {
         const previewCanvas = document.getElementById('preview') as HTMLCanvasElement;
         previewCanvas.height = this.config.previewCellSize * 4 * 6;
         previewCanvas.width = this.config.previewCellSize * 4;
+        previewCanvas.style.height = `${previewCanvas.height}px`
+        previewCanvas.style.width = `${previewCanvas.width}px`
 
         /**
          * Initialize hold piece canvas
          *
          */
         const holdPiece = document.getElementById('hold_piece') as HTMLCanvasElement;
-        holdPiece.height = this.config.previewCellSize * 4;
-        holdPiece.width = this.config.previewCellSize * 4;
+        holdPiece.height = this.config.holdCellSize * 4;
+        holdPiece.width = this.config.holdCellSize * 4;
+        holdPiece.style.height = `${holdPiece.height}px`
+        holdPiece.style.width = `${holdPiece.width}px`
+
 
         /**
          * Initialize Input Controls
@@ -428,10 +434,10 @@ class Tetris {
                     context.fillStyle = '#1e2130';
                 }
                 context.fillRect(
-                    col * (this.config.previewCellSize + 1) + 1,
-                    row * (this.config.previewCellSize + 1) + 1,
-                    this.config.previewCellSize,
-                    this.config.previewCellSize,
+                    col * (this.config.holdCellSize + 1) + 1,
+                    row * (this.config.holdCellSize + 1) + 1,
+                    this.config.holdCellSize,
+                    this.config.holdCellSize,
                 );
             }
         }
@@ -495,22 +501,21 @@ class Tetris {
         // Explicitly update width and height inline so the CSS grid updates its 'max-content' calculations
         this.canvas.height = (this.config.cellSize + 1) * this.height + 1;
         this.canvas.width = (this.config.cellSize + 1) * this.width + 1;
-    
+
         const previewCanvas = document.getElementById('preview') as HTMLCanvasElement;
         if (previewCanvas) {
             previewCanvas.height = this.config.previewCellSize * 4 * CELL_PREVIEW_AMOUNT;
             previewCanvas.width = this.config.previewCellSize * 4;
-            const previewCtx = previewCanvas.getContext('2d');
-            if (previewCtx) {
-                // Disable preview context smoothing
-                previewCtx.imageSmoothingEnabled = false; 
-            }
+            previewCanvas.style.height = `${previewCanvas.height}px`
+            previewCanvas.style.width = `${previewCanvas.width}px`
         }
     
         const holdPiece = document.getElementById('hold_piece') as HTMLCanvasElement;
         if (holdPiece) {
-            holdPiece.height = this.config.previewCellSize * 4;
-            holdPiece.width = this.config.previewCellSize * 4;
+            holdPiece.height = this.config.holdCellSize * 4;
+            holdPiece.width = this.config.holdCellSize * 4;
+            holdPiece.style.height = `${holdPiece.height}px`
+            holdPiece.style.width = `${holdPiece.width}px`    
         }
 
         

@@ -149,6 +149,7 @@ $breakpoint-tablet: 768px;
                 .card {
                     gap: 1rem; // restore .card's full gap on tablet+
                     padding: $card-padding;
+                    width: 100%;
                 }
             }
 
