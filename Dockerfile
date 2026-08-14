@@ -48,6 +48,7 @@ FROM nginx:stable-alpine
 
 # Your webpack build appears to produce dist/
 COPY --from=frontend-build /app/dist /usr/share/nginx/html
+COPY --from=frontend-build /app/public /usr/share/nginx/html
 
 EXPOSE 80
 
