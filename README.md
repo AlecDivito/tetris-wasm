@@ -90,3 +90,14 @@ Also some stuff that looks intresting and helpful but haven't read yet:
 - https://liacs.leidenuniv.nl/~kosterswa/tetris/tot.pdf
 - https://tetris.wiki/Tetris_Guideline
 
+## Build docker file
+
+```bash
+docker buildx build \
+    --platform "linux/amd64" \
+    --provenance false \
+    --file "Dockerfile" \
+    --tag "registry/alecdivito/tetris:v1.0.0" \
+    --push \
+    "."
+```

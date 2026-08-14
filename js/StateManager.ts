@@ -2,7 +2,7 @@ import MainMenuPage from "./pages/MainMenuPage";
 import GamePage from "./pages/GamePage";
 import PauseModal from "./pages/PauseModal";
 import GameOverModal from "./pages/GameOverModal";
-import Tetris from "./Tetris";
+import Tetris, { TetrisConfig } from "./Tetris";
 import { Game } from "../crates/pkg/rusty_web_tetris";
 import CustomGamePage from "./pages/CustomGamePage";
 import HowToPlayModal from "./pages/HowToPlayModal";
@@ -74,6 +74,13 @@ export default class StateManager {
         this.gameOverModal.hide();
     }
 
+    UpdateTetrisConfig(config: TetrisConfig) {
+        if (this.game) {
+            this.game.tetrisConfig = config
+            this.game.resizeCanvasElements()
+        }
+    }
+
     GoToGameAndRestartGame() {
         this.GoToGame();
         this.game = new Tetris(Game.new(), this.gamePage.CalculateTetrisConfig());
@@ -120,15 +127,11 @@ export default class StateManager {
         }
     }
 
-    private GoToPauseGameModal() {
+    GoToPauseModalAndPauseGame() {
         this.mainMenu.hide();
         this.gamePage.show();
         this.pauseModal.show();
         this.gameOverModal.hide();
-    }
-
-    GoToPauseModalAndPauseGame() {
-        this.GoToPauseGameModal();
         if (!this.game) {
             throw new Error('[GoToPauseModalAndPauseGame]: Game MUST exist for the game to be paused');
         } else {
