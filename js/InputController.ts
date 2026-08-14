@@ -11,33 +11,33 @@ export default class InputController {
     // TODO: add mouse tracking
 
 
-    private input: { [key: string]: boolean } = {
+    private input: { [key: string]: boolean | null } = {
         /**
          * Keyboard input
          */
-        ShiftLeft: false,
-        ControlLeft: false,
-        Escape: false,
-        Space: false,
-        ArrowLeft: false,
-        ArrowUp: false,
-        ArrowRight: false,
-        ArrowDown: false,
-        KeyC: false,
-        KeyX: false,
-        KeyZ: false,
-        KeyP: false,
-        Numpad0: false,
-        Numpad1: false,
-        Numpad2: false,
-        Numpad3: false,
-        Numpad4: false,
-        Numpad5: false,
-        Numpad6: false,
-        Numpad7: false,
-        Numpad8: false,
-        Numpad9: false,
-        F1: false,
+        ShiftLeft: null,
+        ControlLeft: null,
+        Escape: null,
+        Space: null,
+        ArrowLeft: null,
+        ArrowUp: null,
+        ArrowRight: null,
+        ArrowDown: null,
+        KeyC: null,
+        KeyX: null,
+        KeyZ: null,
+        KeyP: null,
+        Numpad0: null,
+        Numpad1: null,
+        Numpad2: null,
+        Numpad3: null,
+        Numpad4: null,
+        Numpad5: null,
+        Numpad6: null,
+        Numpad7: null,
+        Numpad8: null,
+        Numpad9: null,
+        F1: null,
 
         /**
          * mouse input
@@ -107,25 +107,35 @@ export default class InputController {
         112: "F1",
     };
 
-    private hasRecordedClockwiseRotation = false
-    private hasRecordedCounterCloseWiseRotation = false
-
-    private clockwiseRotationKeys = [
+    private singleActivationKeys: Partial<keyof typeof this.input>[] = [
         'Numpad1',
         'Numpad5',
         'Numpad9',
         'KeyX',
         'ArrowUp',
         'tapRight',
-    ]
-
-    private counterClockwiseRotationKeys = [
-        'Numpad7',
         'Numpad3',
+        'Numpad7',
         'ControlLeft',
         'KeyZ',
         'tapLeft',
+        'Numpad8',
+        'Space',
+        'leftClick',
+        'dragDown',
+        'Numpad0',
+        'KeyC',
+        'ShiftLeft',
+        'rightClick',
+        'tapHold',
+        'Numpad4',
+        'ArrowLeft',
+        'Numpad6',
+        'ArrowRight',
+        'Escape',
     ]
+
+    private dragTriggered = false;
 
     /**
      * Create a Input controller
@@ -177,18 +187,18 @@ export default class InputController {
         const updateTouch = (event: TouchEvent) => {
             this.touchEventFirst = true;
             if (event.type === 'touchend') {
+                this.dragTriggered = false
                 const x = event.changedTouches[0].clientX - this.canvasElement.offsetLeft;
                 const y = event.changedTouches[0].clientY - this.canvasElement.offsetTop;
 
                 this.touchInput.x = x;
                 this.touchInput.y = y;
 
-                const diff_x = Math.floor(this.touchInput.startX - x);
-                const diff_y = Math.floor(this.touchInput.startY - y);
+                const diffX = x - this.touchInput.startX;
+                const diffY = y - this.touchInput.startY;
                 const timeDiff = event.timeStamp - this.touchInput.touchStartTime;
                 const threshold = 160; // 5 frames
-                const isTap = diff_x >= -1 && diff_x <= 1 && diff_y >= -1 && diff_y <= 1;
-                console.log(timeDiff, diff_x, diff_y, this.touchInput.startX, x);
+                const isTap = Math.abs(diffX) < 20 && Math.abs(diffY) < 20;
                 if (timeDiff < threshold && isTap) {
                     const width_offset = this.canvasElement.width / 2;
                     if (x < width_offset) {
@@ -203,6 +213,7 @@ export default class InputController {
             const x = event.targetTouches[0].clientX - this.canvasElement.offsetLeft;
             const y = event.targetTouches[0].clientY - this.canvasElement.offsetTop;
             if (event.type === 'touchstart') {
+                this.dragTriggered = false
                 this.touchInput.x = x;
                 this.touchInput.y = y;
                 this.touchInput.timeStamp = event.timeStamp;
@@ -212,24 +223,24 @@ export default class InputController {
                 this.touchInput.touchStartTime = event.timeStamp;
                 return false;
             }
-            const diff_x = this.touchInput.x - x;
-            const diff_y = this.touchInput.y - y;
+            const diff_x = x - this.touchInput.startX;
+            const diff_y = y - this.touchInput.startY;
 
             const abs_x = Math.abs(diff_x);
             const abs_y = Math.abs(diff_y);
 
-            const time = event.timeStamp - this.touchInput.timeStamp;
-            const velocity = Math.sqrt(abs_x * abs_x + abs_y * abs_y) / time;
+            // const time = event.timeStamp - this.touchInput.timeStamp;
+            // const velocity = Math.sqrt(abs_x * abs_x + abs_y * abs_y) / time;
 
-            const flick_threshold = .8;
-            const isFlick = velocity > flick_threshold;
+            // const flick_threshold = .8;
+            // const isFlick = velocity > flick_threshold;
 
             const rad = Math.atan2(y - this.touchInput.y, x - this.touchInput.x);
             const degree = Math.abs(rad) * 180 / Math.PI;
 
-            if (degree > 80 && degree < 100 && isFlick) {
-                // swipe down
+            if (diff_y > 50 && abs_y > abs_x && !this.dragTriggered) {
                 this.input.dragDown = true;
+                this.dragTriggered = true;
             } else if ((degree >= -45 && degree <= 45) || (degree < 225 && degree > 135)) {
                 // move left and right
                 this.touchInput.updated = true;
@@ -241,9 +252,9 @@ export default class InputController {
             return false;
         }
 
-        this.canvasElement.addEventListener('touchmove', updateTouch, { passive: true });
-        this.canvasElement.addEventListener('touchstart', updateTouch, { passive: true });
-        this.canvasElement.addEventListener('touchend', updateTouch, { passive: true });
+        this.canvasElement.addEventListener('touchmove', updateTouch, { passive: false });
+        this.canvasElement.addEventListener('touchstart', updateTouch, { passive: false });
+        this.canvasElement.addEventListener('touchend', updateTouch, { passive: false });
         this.holdPieceCanvas.addEventListener('click', () => this.input.tapHold = true);
 
         this.listening = true;
@@ -266,13 +277,13 @@ export default class InputController {
     public getEventQueue(): Uint8Array /*Action[]*/ {
         const i = this.input;
         const eventQueue: Action[] = [];
-        if ((i.Numpad1 || i.Numpad5 || i.Numpad9 || i.KeyX || i.ArrowUp || i.tapRight) && !this.hasRecordedClockwiseRotation) {
+        if ((i.Numpad1 || i.Numpad5 || i.Numpad9 || i.KeyX || i.ArrowUp || i.tapRight)) {
             eventQueue.push(Action.RotateClockWise);
-            this.hasRecordedClockwiseRotation = true
+            const used = ['Numpad1', 'Numpad5', 'Numpad9', 'KeyX', 'ArrowUp', 'tapRight'].filter(k => this.input[k] === true)
+            used.forEach(key => this.input[key] = false)
         }
-        if ((i.Numpad3 || i.Numpad7 || i.ControlLeft || i.KeyZ || i.tapLeft) && !this.hasRecordedCounterCloseWiseRotation) {
+        if ((i.Numpad3 || i.Numpad7 || i.ControlLeft || i.KeyZ || i.tapLeft)) {
             eventQueue.push(Action.RotateCounterClockWise);
-            this.hasRecordedCounterCloseWiseRotation = true
         }
         if (i.Numpad8 || i.Space || i.leftClick || i.dragDown) {
             eventQueue.push(Action.HardDrop);
@@ -292,7 +303,13 @@ export default class InputController {
         if (i.Escape) {
             eventQueue.push(Action.ToggleRunning)
         }
-        // TODO: THIS SHOULDN'T BE NEEDED, POST An ISSUE
+
+        // Some moves like moves and rotation shouldn't support holding down a key
+        // so for some of the keys we'll control their actions through this idea of
+        // true => movable, false => immovable, null => can be clicked again
+        const used = this.singleActivationKeys.filter(k => this.input[k] === true)
+        used.forEach(key => this.input[key] = false)
+
         const byteEventQueue = new Uint8Array(eventQueue.length);
         for (let j = 0; j < eventQueue.length; j++) {
             const event = eventQueue[j];
@@ -341,13 +358,15 @@ export default class InputController {
      */
     private keyboardEvent = (event: KeyboardEvent) => {
         const code = this.getKeyCode(event);
-        this.input[code] = event.type === "keydown";
-
-        if (event.type === "keyup" && this.clockwiseRotationKeys.includes(code)) {
-            this.hasRecordedClockwiseRotation = false
-        }
-        if (event.type === "keyup" && this.counterClockwiseRotationKeys.includes(code)) {
-            this.hasRecordedCounterCloseWiseRotation = false
+        if (this.singleActivationKeys.includes(code)) {
+            if (this.input[code] === null && event.type === "keydown") {
+                this.input[code] = true;
+            }
+            if (event.type === "keyup") {
+                this.input[code] = null;
+            }
+        } else {
+            this.input[code] = event.type === "keydown"
         }
     }
 

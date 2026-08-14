@@ -58,6 +58,10 @@ class Tetris {
 
     private config: TetrisConfig;
 
+    set tetrisConfig(config: TetrisConfig) {
+        this.config = config
+    }
+
     /**
      * Is the game paused
      */
@@ -213,6 +217,7 @@ class Tetris {
 
         if (this.inputController.Input.Escape || this.inputController.Input.KeyP) {
             StateManager.GetInstance().GoToPauseModalAndPauseGame();
+            return
         }
         // handle all the queued events on the input controller
         const touchControls = this.inputController.getTouchGridArea(this.config.cellSize, this.tetrisGame.get_piece_bounding_box());
@@ -482,6 +487,33 @@ class Tetris {
             default:
                 return emptyOverride ?? '#1e2130'; // white
         }
+    }
+
+    public resizeCanvasElements() {
+        if (!this.canvas) return;
+    
+        // Explicitly update width and height inline so the CSS grid updates its 'max-content' calculations
+        this.canvas.height = (this.config.cellSize + 1) * this.height + 1;
+        this.canvas.width = (this.config.cellSize + 1) * this.width + 1;
+    
+        const previewCanvas = document.getElementById('preview') as HTMLCanvasElement;
+        if (previewCanvas) {
+            previewCanvas.height = this.config.previewCellSize * 4 * CELL_PREVIEW_AMOUNT;
+            previewCanvas.width = this.config.previewCellSize * 4;
+            const previewCtx = previewCanvas.getContext('2d');
+            if (previewCtx) {
+                // Disable preview context smoothing
+                previewCtx.imageSmoothingEnabled = false; 
+            }
+        }
+    
+        const holdPiece = document.getElementById('hold_piece') as HTMLCanvasElement;
+        if (holdPiece) {
+            holdPiece.height = this.config.previewCellSize * 4;
+            holdPiece.width = this.config.previewCellSize * 4;
+        }
+
+        
     }
 }
 

@@ -4,25 +4,24 @@ import StateManager from "../StateManager";
 import { TetrisConfig } from "../Tetris";
 
 export default class GamePage extends Page {
-    
+
     private pauseBtn: HTMLButtonElement;
 
     private rightContentBar: HTMLElement;
     private mainContentBar: HTMLElement
-    private leftContentBar: HTMLElement;
 
     constructor() {
         super('game-page');
         this.pauseBtn = GetElementById('game-pause') as HTMLButtonElement;
         this.pauseBtn.addEventListener('click', this.pauseGame);
 
-        this.rightContentBar = GetElementById('game__board__item--right');
-        this.mainContentBar = GetElementById('game__board__item--main');
-        this.leftContentBar = GetElementById('game__board__item--left');
+        this.rightContentBar = GetElementById('preview');
+        this.mainContentBar = GetElementById('tetris');
+
+        window.addEventListener('resize', this.onResize)
     }
 
     show() {
-        this.BeforePageLoad();
         super.show();
     }
 
@@ -30,34 +29,25 @@ export default class GamePage extends Page {
         super.hide();
     }
 
-    BeforePageLoad() {
-        let padding = 8 * 4;
-        let width = document.documentElement.clientWidth - padding;
-        
-        let mainWidth = .465 * width;
-        let sideWidth = .15 * width;
-
-        // this.rightContentBar.style.width = `${sideWidth}px`;
-        // this.leftContentBar.style.width = `${sideWidth}px`;
-        // this.mainContentBar.style.width = `${mainWidth}px`;
-    }
-
     pauseGame = () => {
         StateManager.GetInstance().GoToPauseModalAndPauseGame();
     }
 
     CalculateTetrisConfig(): TetrisConfig {
-        let width = document.documentElement.clientWidth - 8 * 4;
-        
-        let cellSize = (.70 * width) / 10;
-        let previewCellSize = (.15 * width) / 4;
+        // The goal:
+        // Make sure the tetris board always fits on the screen.
+        // It must take the height and width into account when
+        // rendering that board
 
-        if (cellSize > 35) {
-            cellSize = 35;
-        }
-        if (previewCellSize > 15) {
-            previewCellSize = 15;
-        }
+        // 1. Base sizing on viewport dimension limits instead of the canvas width
+        let availableHeight = window.innerHeight - 100; // Leave space for headers/footers
+        let maxCellSizeByHeight = Math.floor((availableHeight - 1) / 20) - 1; // Assuming 20 rows standard
+
+        // 2. Set bounds (Minimum: 15px, Maximum: 35px)
+        let cellSize = Math.max(15, Math.min(maxCellSizeByHeight, 35));
+
+        // 3. Scale preview size proportional to main game grid cell size
+        let previewCellSize = Math.max(10, Math.min(Math.floor(cellSize * 0.25), 15));
 
         return {
             gridColor: "#1e2130",
@@ -66,4 +56,7 @@ export default class GamePage extends Page {
         };
     }
 
+    private onResize = () => {
+        StateManager.GetInstance().UpdateTetrisConfig(this.CalculateTetrisConfig())
+    }
 }

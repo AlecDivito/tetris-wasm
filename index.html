@@ -23,7 +23,9 @@
                     </div>
                     <div class="flex column gap-4">
                         <button id="main-menu-play">Play</button>
-                        <button id="main-menu-custom-game" style="display: none">Custom Game</button>
+                        <button id="main-menu-custom-game" style="display: none">
+                            Custom Game
+                        </button>
                         <button id="main-menu-how-to-play">How to Play</button>
                     </div>
                 </div>
@@ -256,53 +258,39 @@
         </div>
 
         <div id="game-page" class="game">
-            <div class="game__bar">
-                <h2>Tetris</h2>
-            </div>
-            <div class="flex center">
-                <div class="game__board">
-                    <div
-                        id="game__board__item--left"
-                        class="game__board__item game__board__item--left flex column gap-4"
-                    >
-                        <div class="card">
-                            <p class="card__title">Hold</p>
-                            <div class="card__content flex center">
-                                <canvas class="" id="hold_piece"></canvas>
-                            </div>
+            <div class="game__board">
+                <div class="game__board__item--left flex gap-4">
+                    <div class="card game__board__hold">
+                        <p class="card__title">Hold</p>
+                        <div class="card__content flex center">
+                            <canvas id="hold_piece"></canvas>
                         </div>
-                        <div class="card gap-0">
-                            <h3 class="flex row gap-2 between">
-                                <span class="label">Score</span>
-                                <span class="value" id="score">0</span>
-                            </h3>
-                            <h3 class="flex row gap-2 between">
-                                <span class="label">level</span>
-                                <span class="value" id="level">0</span>
-                            </h3>
-                            <h3 class="flex row gap-2 between">
-                                <span class="label">Rows</span>
-                                <span class="value" id="rows_completed">0</span>
-                            </h3>
-                        </div>
-                        <button id="game-pause">⏸</button>
                     </div>
-                    <div
-                        id="game__board__item--main"
-                        class="game__board__item game__board__item--main"
-                    >
-                        <canvas id="tetris"></canvas>
+                    <div class="game__board__score card gap-0">
+                        <h3 class="flex row between">
+                            <span class="label">Score</span>
+                            <span class="value" id="score">0</span>
+                        </h3>
+                        <h3 class="flex row between">
+                            <span class="label">level</span>
+                            <span class="value" id="level">0</span>
+                        </h3>
+                        <h3 class="flex row between">
+                            <span class="label">Rows</span>
+                            <span class="value" id="rows_completed">0</span>
+                        </h3>
                     </div>
-                    <div
-                        id="game__board__item--right"
-                        class="game__board__item game__board__item--right"
-                    >
-                        <div class="card">
-                            <p class="card__title">Next</p>
-                            <div class="card__content flex center">
-                                <canvas id="preview"></canvas>
-                            </div>
-                        </div>
+                    <button id="game-pause">⏸</button>
+                </div>
+        
+                <div class="game__board__item--main">
+                    <canvas id="tetris"></canvas>
+                </div>
+        
+                <div class="game__board__item--right card">
+                    <p class="card__title">Next</p>
+                    <div class="card__content flex column gap-2">
+                        <canvas id="preview"></canvas>
                     </div>
                 </div>
             </div>
@@ -475,10 +463,13 @@
                         <h3 class="game-over__title">High Scores</h3>
                         <div id="game-over-score-list-loading">Loading...</div>
                         <div id="game-over-score-list-fail">Failed to fetch high scores.</div>
-                        <ol id="game-over-score-list" class="game-over__list flex gap-2 column"></ol>
+                        <ol
+                            id="game-over-score-list"
+                            class="game-over__list flex gap-2 column"
+                        ></ol>
                         <div id="game-over-form" class="flex gap-2 column">
                             <h3 class="game-over__title">Save your score</h3>
-                            <p id="game-over-saved-score-text" style="display: none;">Saved!</p>
+                            <p id="game-over-saved-score-text" style="display: none">Saved!</p>
                             <form id="game-over-save-score-form" class="flex gap-2 row full center">
                                 <input type="text" name="player" class="full" required />
                                 <button class="inverted sm">Save</button>
@@ -494,10 +485,10 @@
         <template id="high-score-row">
             <li class="flex center between">
                 <div class="flex row center between gap-4">
-                    <span data-label="number" class="game-over__list--number">1</span>
-                    <span data-label="name">Maya</span>
+                    <span data-label="number" class="game-over__list--number"></span>
+                    <span data-label="name" class="game-over__list--name"></span>
                 </div>
-                <span data-label="score">9,000</span>
+                <span data-label="score"></span>
             </li>
         </template>
 

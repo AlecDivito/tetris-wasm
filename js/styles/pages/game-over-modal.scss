@@ -41,10 +41,32 @@
     &__list {
         padding: 0.25rem 1rem;
         max-height: 120px;
-        overflow: scroll;
-        
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100%;
+        box-sizing: border-box;
+
+        > li {
+            width: 100%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0.15rem 0rem;
+
+            > div {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
         &--number {
             color: $color-text-secondary;
+        }
+
+        &--name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     }
 
